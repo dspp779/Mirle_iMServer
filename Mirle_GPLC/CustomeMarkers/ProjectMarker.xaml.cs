@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
 using GMap.NET.WindowsPresentation;
 using Mirle.iMServer.Model;
+using GMap.NET;
 
 namespace Mirle_GPLC.CustomeMarkers
 {
@@ -118,10 +119,36 @@ namespace Mirle_GPLC.CustomeMarkers
         {
             //Point p = e.GetPosition(gMap);
             //gMap.Position = gMap.FromLocalToLatLng((int)p.X, (int)p.Y);
-            gMap.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionAndCenter;
-            gMap.Position = new GMap.NET.PointLatLng(Project.lat, Project.lng);
+            //gMap.Position = gMap.FromLocalToLatLng((int)(renderOffset.X), (int)(renderOffset.Y));
+            //gMap.Position = position;
+            //gMap.Zoom += (e.Delta > 0) ? 1 : -1;
+            //RoutedEventArgs r = new RoutedEventArgs(e);
+
+            // latlng position of the project
+            PointLatLng projectPosition = new PointLatLng(Project.lat, Project.lng);
+
+            // local position of the project
+            GPoint mouseLastZoom = gMap.FromLatLngToLocal(projectPosition);
+
+            // center zoom to project
+            gMap.Position = projectPosition;
             gMap.Zoom += (e.Delta > 0) ? 1 : -1;
-            gMap.MouseWheelZoomType = GMap.NET.MouseWheelZoomType.MousePositionWithoutCenter;
+
+            int zoom = (int)gMap.Zoom;
+
+            // pixel position of the project
+            GPoint positionPixel = gMap.MapProvider.Projection.FromLatLngToPixel(projectPosition, zoom);
+
+            // compute render offset
+            GPoint renderOffset = GPoint.Empty;
+            renderOffset.X = (int)gMap.RenderSize.Width/2 - mouseLastZoom.X;
+            renderOffset.Y = (int)gMap.RenderSize.Height/2 - mouseLastZoom.Y;
+
+            // new center position in pixel
+            positionPixel.Offset(renderOffset);
+
+            // compute latlng of new center position
+            gMap.Position = gMap.MapProvider.Projection.FromPixelToLatLng(positionPixel, zoom);
         }
     }
 }

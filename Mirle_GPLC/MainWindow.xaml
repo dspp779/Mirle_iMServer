@@ -80,7 +80,7 @@
 
                 <TabItem Header="地圖瀏覽" Name="tabItem_map">
                     <Grid>
-                        <my:GMapControl Margin="0,0,0,0" Name="gMap" MaxZoom="20" MinZoom="3" MouseWheelZoomType="MousePositionAndCenter" />
+                        <my:GMapControl Margin="0,0,0,0" Name="gMap" MaxZoom="20" MinZoom="3" MouseWheelZoomType="MousePositionWithoutCenter" />
                     </Grid>
                 </TabItem>
                 <TabItem Header="設定" Name="setting">
