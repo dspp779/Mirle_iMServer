@@ -105,9 +105,9 @@
                     </Grid>
                 </TabItem>
             </Controls:MetroAnimatedTabControl>
-            <TextBox Height="23" Name="textBox1" VerticalAlignment="Top" Controls:TextboxHelper.Watermark="Search..."
+            <TextBox Height="23" Name="textBox_searchProject" VerticalAlignment="Top" Controls:TextboxHelper.Watermark="搜尋..."
                          Controls:TextboxHelper.ClearTextButton="True"
-                         Controls:TextboxHelper.ButtonCommand="{Binding TextBoxButtonCmd, Mode=OneWay}" Margin="5,0,6,0">
+                         Controls:TextboxHelper.ButtonCommand="{Binding TextBoxButtonCmd, Mode=OneWay}" Margin="5,0,6,0" TextChanged="textBox_searchProject_TextChanged">
                 <TextBox.Style>
                     <Style TargetType="{x:Type TextBox}"
                                BasedOn="{StaticResource SearchMetroTextBox}">
