@@ -46,15 +46,17 @@ namespace Mirle.iMServer.Model
             MySqlDbInterface db = new MySqlDbInterface();
             using (DbConnection conn = db.getConnection())
             {
+                int i = 0;
                 conn.Open();
-                MySqlCommand cmd = new MySqlCommand("SELECT * FROM Project WHERE name LIKE @keyword");
+                MySqlCommand cmd = new MySqlCommand("SELECT * FROM Project WHERE FALSE");
                 cmd.Connection = conn as MySqlConnection;
                 foreach (string keyword in keywords)
                 {
-                    cmd.Parameters.Clear();
-                    cmd.Parameters.AddWithValue("@keyword", '%' + keyword + '%');
-                    getProjectList(cmd, pList);
+                    cmd.CommandText += " OR name LIKE @keyword" + i;
+                    cmd.Parameters.AddWithValue("@keyword" + i, '%' + keyword + '%');
+                    i++;
                 }
+                getProjectList(cmd, pList);
             }
             return pList;
         }

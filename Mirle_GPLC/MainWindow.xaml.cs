@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using GMap.NET;
 using MahApps.Metro.Controls;
 using GMap.NET.WindowsPresentation;
 using GMap.NET.MapProviders;
 using Mirle.iMServer.Model;
 using Mirle_GPLC.CustomeMarkers;
+using System.Text.RegularExpressions;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace Mirle_GPLC
 {
@@ -71,6 +64,8 @@ namespace Mirle_GPLC
 
         private void loadProjectData(string keyword)
         {
+            Regex reg = new Regex("\\s+");
+            keyword = reg.Replace(keyword.Trim(), " ");
             string[] strs = keyword.Split(' ');
             // 載入所有專案
             this.pList = ModelUtil.getProjectList(strs);
@@ -81,6 +76,7 @@ namespace Mirle_GPLC
             // 更新專案列表
             // 清空專案列表
             projectListView.Items.Clear();
+            gMap.Markers.Clear();
             // 加入專案列表
             foreach (ProjectData p in pList)
             {
@@ -141,6 +137,30 @@ namespace Mirle_GPLC
         }
 
         #endregion
+
+        private async void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            bool _shutdown = false;
+            e.Cancel = !_shutdown;
+            var mySettings = new MetroDialogSettings()
+            {
+                AffirmativeButtonText = "確定",
+                NegativeButtonText = "取消",
+                AnimateShow = true,
+                AnimateHide = false
+            };
+
+            
+
+            var result = await this.ShowMessageAsync("關閉地理資訊系統?",
+                "確定要關閉地理資訊系統嗎?",
+                MessageDialogStyle.AffirmativeAndNegative, mySettings);
+
+            _shutdown = result == MessageDialogResult.Affirmative;
+            
+            if (_shutdown)
+                Application.Current.Shutdown();
+        }
 
     }
 }
