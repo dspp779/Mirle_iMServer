@@ -23,9 +23,9 @@
     <Style x:Key="StandardMenu"
            TargetType="{x:Type Menu}">
         <Setter Property="Background"
-                Value="{StaticResource LightBackground}" />
+                Value="{DynamicResource Background}" />
         <Setter Property="Foreground"
-                Value="{StaticResource Foreground}" />
+                Value="{DynamicResource Foreground}" />
     </Style>
 
     <Style x:Key="StandardMenuItem"

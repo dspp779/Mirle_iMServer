@@ -10,11 +10,11 @@
         <Setter Property="Visibility"
                 Value="Visible" />
         <Setter Property="Foreground"
-                Value="{StaticResource Foreground}" />
+                Value="{DynamicResource Foreground}" />
         <Setter Property="Background"
-                Value="{StaticResource BackgroundNormal}" />
+                Value="{DynamicResource BackgroundNormal}" />
         <Setter Property="BorderBrush"
-                Value="{StaticResource BorderBrushNormal}" />
+                Value="{DynamicResource BorderBrushNormal}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">

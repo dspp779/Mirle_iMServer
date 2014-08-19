@@ -13,15 +13,15 @@
                 Value="0" />
         <Style.Resources>
             <Style TargetType="{x:Type ListBoxItem}">
-                <Setter Property="Height" Value="50" />
+                <Setter Property="MinHeight" Value="50" />
                 <Setter Property="VerticalContentAlignment" Value="Center" />
                 <Setter Property="SnapsToDevicePixels" Value="True" />
-                <Setter Property="FocusVisualStyle"
-                        Value="{x:Null}" />
-                <Setter Property="Background"
-                        Value="Transparent" />
-                <Setter Property="BorderBrush"
-                        Value="Transparent" />
+                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource Foreground}" />
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="Opacity" Value="0.6" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ListBoxItem}">
@@ -33,25 +33,64 @@
                                 <ContentPresenter Margin="8,5" />
                             </Grid>
                             <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation Duration="0:0:0.3"
+                                                                Storyboard.TargetProperty="BorderBrush.Color"
+                                                                To="{StaticResource Gray7}" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation Duration="0:0:0.5"
+                                                                Storyboard.TargetProperty="BorderBrush.Color"
+                                                                To="Transparent" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation Duration="0:0:0.5"
+                                                                Storyboard.TargetProperty="Background.Color"
+                                                                To="Transparent" />
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
                                 <MultiTrigger>
                                     <MultiTrigger.Conditions>
                                         <Condition Property="IsMouseOver"
-                                                   Value="True" />
+                                                   Value="False" />
                                         <Condition Property="IsSelected"
                                                    Value="False" />
                                     </MultiTrigger.Conditions>
-                                    <Setter Property="Background"
-                                            Value="{StaticResource BackgroundHighlighted}" />
-                                    <Setter Property="BorderBrush"
-                                            Value="{StaticResource BorderBrushHighlighted}" />
+                                    <MultiTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Duration="0:0:0.3"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 From="1" To="0.6"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </MultiTrigger.EnterActions>
+                                    <MultiTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Duration="0:0:0.5"
+                                                                 Storyboard.TargetProperty="Opacity"
+                                                                 From="0.6" To="1"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </MultiTrigger.ExitActions>
                                 </MultiTrigger>
-                                <Trigger Property="IsSelected"
-                                         Value="True">
-                                    <Setter Property="Background"
-                                            Value="{StaticResource BackgroundSelected}" />
-                                    <Setter Property="BorderBrush"
-                                            Value="{StaticResource BorderBrushSelected}" />
-                                </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>

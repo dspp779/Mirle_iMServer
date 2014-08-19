@@ -2,14 +2,14 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using GMap.NET;
+using System.Text.RegularExpressions;
 using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using GMap.NET;
 using GMap.NET.WindowsPresentation;
 using GMap.NET.MapProviders;
 using Mirle.iMServer.Model;
 using Mirle_GPLC.CustomeMarkers;
-using System.Text.RegularExpressions;
-using MahApps.Metro.Controls.Dialogs;
 
 namespace Mirle_GPLC
 {
@@ -18,6 +18,8 @@ namespace Mirle_GPLC
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        private readonly MainWindowViewModel _viewModel;
+
         // marker
         GMapMarker currentMarker;
         List<GMapMarker> deviceMarkers;
@@ -27,6 +29,8 @@ namespace Mirle_GPLC
 
         public MainWindow()
         {
+            _viewModel = new MainWindowViewModel();
+            DataContext = _viewModel;
             InitializeComponent();
 
             // add your custom map db provider
@@ -82,7 +86,6 @@ namespace Mirle_GPLC
             {
                 GMapMarker pm = newProjectMarker(p);
                 projectListView.Items.Add(p);
-                newProjectMarker(p);
             }
         }
 
@@ -136,8 +139,14 @@ namespace Mirle_GPLC
             searchProject(textBox_searchProject.Text);
         }
 
+        private void textBox_searchTag_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            searchProject(textBox_searchTag.Text);
+        }
+
         #endregion
 
+        // 非同步視窗關閉確認
         private async void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             bool _shutdown = false;
@@ -150,16 +159,39 @@ namespace Mirle_GPLC
                 AnimateHide = false
             };
 
-            
-
-            var result = await this.ShowMessageAsync("關閉地理資訊系統?",
-                "確定要關閉地理資訊系統嗎?",
+            var result = await this.ShowMessageAsync(
+                "關閉地理資訊系統?", "確定要關閉地理資訊系統嗎?",
                 MessageDialogStyle.AffirmativeAndNegative, mySettings);
 
             _shutdown = result == MessageDialogResult.Affirmative;
             
             if (_shutdown)
                 Application.Current.Shutdown();
+        }
+
+        private void projectListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ProjectData p = projectListView.SelectedItem as ProjectData;
+            projectFlyout.Header = p.name;
+            projectFlyout.IsOpen = true;
+            initFlyout(p);
+        }
+
+        private void initFlyout(ProjectData project)
+        {
+            textBlock_projectAddr.Text = project.addr;
+            projectTagTable.Items.Clear();
+
+            List<Device> devices = project.devices;
+
+            foreach (Device device in devices)
+            {
+                List<Tag> tags = device.tags;
+                foreach (Tag tag in tags)
+                {
+                    projectTagTable.Items.Add(tag);
+                }
+            }
         }
 
     }

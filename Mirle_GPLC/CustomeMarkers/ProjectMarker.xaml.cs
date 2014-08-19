@@ -27,7 +27,7 @@ namespace Mirle_GPLC.CustomeMarkers
         Label Label;
         GMapMarker Marker;
         GMapControl gMap;
-        ProjectData Project;
+        public ProjectData Project;
 
         public ProjectMarker(GMapControl gMap, GMapMarker marker, ProjectData project)
         {
@@ -115,15 +115,25 @@ namespace Mirle_GPLC.CustomeMarkers
             Popup.IsOpen = true;
         }
 
+        /* 滑鼠位於標記點上時，滾輪滑動事件處理
+         * 
+         * 說明：
+         * 在GMap中，如果對Zoom值直接修，作畫面進行縮放時，中心點會維持不變
+         * 而此事件情況為滑鼠滑鼠位於標記點上時，使用者通常希望觀看標記點的資訊
+         * 所以滑鼠所位於的標記點，必須在畫面上保持不動
+         * 
+         * 以下作法為
+         * 先記錄標記點在畫面的位置 (mouseLastZoom)
+         * 以標記點做為中心進行縮放 (Zoom+-)
+         * 
+         * 算出先前已記錄畫面位置的點與畫面中心的像素差 (renderOffset)
+         * 此像素差即為整張地圖所需的位移量
+         * 
+         * 算出新的中心點像素位置：當前標記點的像素位置+位移量
+         * 算出中心點經緯座標：FromPixelToLatLng
+         */
         private void ProjectMarker_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            //Point p = e.GetPosition(gMap);
-            //gMap.Position = gMap.FromLocalToLatLng((int)p.X, (int)p.Y);
-            //gMap.Position = gMap.FromLocalToLatLng((int)(renderOffset.X), (int)(renderOffset.Y));
-            //gMap.Position = position;
-            //gMap.Zoom += (e.Delta > 0) ? 1 : -1;
-            //RoutedEventArgs r = new RoutedEventArgs(e);
-
             // latlng position of the project
             PointLatLng projectPosition = new PointLatLng(Project.lat, Project.lng);
 
@@ -136,18 +146,18 @@ namespace Mirle_GPLC.CustomeMarkers
 
             int zoom = (int)gMap.Zoom;
 
-            // pixel position of the project
-            GPoint positionPixel = gMap.MapProvider.Projection.FromLatLngToPixel(projectPosition, zoom);
-
             // compute render offset
             GPoint renderOffset = GPoint.Empty;
             renderOffset.X = (int)gMap.RenderSize.Width/2 - mouseLastZoom.X;
             renderOffset.Y = (int)gMap.RenderSize.Height/2 - mouseLastZoom.Y;
 
+            // current pixel position of the project
+            GPoint positionPixel = gMap.MapProvider.Projection.FromLatLngToPixel(projectPosition, zoom);
+
             // new center position in pixel
             positionPixel.Offset(renderOffset);
 
-            // compute latlng of new center position
+            // compute and set the latlng of new center position
             gMap.Position = gMap.MapProvider.Projection.FromPixelToLatLng(positionPixel, zoom);
         }
     }

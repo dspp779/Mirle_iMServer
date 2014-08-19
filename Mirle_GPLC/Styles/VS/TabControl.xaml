@@ -2,24 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary>
-
-            <!--  General  -->
-            <SolidColorBrush x:Key="TabBackgroundHighlighted" Color="#54545C" />
-            <SolidColorBrush x:Key="TabBorderBrushHighlighted" Color="#6A6A75" />
-            <SolidColorBrush x:Key="TabBackgroundSelected" Color="#007ACC" />
-            <SolidColorBrush x:Key="TabBorderBrushSelected" Color="#1C97EA" />
-            <SolidColorBrush x:Key="TabBackgroundNormal" Color="#3F3F46" />
-            <SolidColorBrush x:Key="TabBorderBrushNormal" Color="#54545C" />
-
-            <SolidColorBrush x:Key="TabForegroundHighlighted" Color="#FFFFFF" />
-            <!--  Close Button  -->
-            <SolidColorBrush x:Key="CloseButtonBackgroundHighlighted" Color="#39ADFB" />
-            <SolidColorBrush x:Key="CloseButtonBackgroundPressed" Color="#084E7D" />
-            <SolidColorBrush x:Key="CloseButtonStroke" Color="#AAFFFFFF" />
-            <SolidColorBrush x:Key="CloseButtonStrokeHighlighted" Color="#FFFFFF" />
-        </ResourceDictionary>
-
+        <ResourceDictionary Source="pack://application:,,,/Mirle_GPLC;component/Styles/VS/Colors.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
     <Style TargetType="{x:Type TabItem}">
@@ -46,12 +29,12 @@
                             <Setter Property="Foreground" Value="{DynamicResource Foreground}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="true">
-                            <Setter Property="Background" Value="{DynamicResource TabBorderBrushSelected}" />
-                            <Setter Property="Foreground" Value="{DynamicResource TabForegroundHighlighted}" />
+                            <Setter Property="Background" Value="{DynamicResource BorderBrushSelected}" />
+                            <Setter Property="Foreground" Value="{DynamicResource ForegroundHighlighted}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="true">
-                            <Setter Property="Background" Value="{DynamicResource TabBackgroundSelected}" />
-                            <Setter Property="Foreground" Value="{DynamicResource TabForegroundHighlighted}" />
+                            <Setter Property="Background" Value="{DynamicResource BackgroundSelected}" />
+                            <Setter Property="Foreground" Value="{DynamicResource ForegroundHighlighted}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

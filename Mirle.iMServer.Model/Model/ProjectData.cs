@@ -68,7 +68,7 @@ namespace Mirle.iMServer.Model
 
         public void reload()
         {
-            //_devices = ModelUtil.getDeviceList(_id);
+            _devices = ModelUtil.getDeviceList(this);
         }
     }
 }
