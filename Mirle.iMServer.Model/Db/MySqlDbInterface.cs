@@ -13,13 +13,48 @@ namespace Mirle.iMServer.Model.Db
 {
     public class MySqlDbInterface : DbInterface
     {
-        // default db file path
-        private string dataSource = @"server=localhost;user id=root;Password= ;persist security info=True;database=mirle;charset=utf8";
+        // default db data source
+        private string server = "192.168.30.78";
+        private string userid = "test";
+        private string password = "1234567";
+        private string database = "mirle";
+        private string charset = "utf8";
+        private bool persistSecurityInfo = true;
+
+        public string Server
+        {
+            get { return server; }
+            set { server = value; }
+        }
+        public string User
+        {
+            get { return userid; }
+            set { userid = value; }
+        }
+        public string Password
+        {
+            get { return password; }
+            set { password = value; }
+        }
+        public string Database
+        {
+            get { return database; }
+            set { database = value; }
+        }
+        public string DataSource
+        {
+            get
+            {
+                return string.Format("server={0};user id={1};Password={2};"
+                + "database={3};charset={4};persist security info={5};",
+                server, userid, password, database, charset, persistSecurityInfo);
+            }
+        }
 
         // get SQL connection
         public DbConnection getConnection()
         {
-            return getConnection(dataSource);
+            return getConnection(DataSource);
         }
 
         // get SQL connection with specified db file path

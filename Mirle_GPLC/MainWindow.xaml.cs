@@ -10,6 +10,7 @@ using GMap.NET.WindowsPresentation;
 using GMap.NET.MapProviders;
 using Mirle.iMServer.Model;
 using Mirle_GPLC.CustomeMarkers;
+using System;
 
 namespace Mirle_GPLC
 {
@@ -21,8 +22,8 @@ namespace Mirle_GPLC
         private readonly MainWindowViewModel _viewModel;
 
         // marker
-        GMapMarker currentMarker;
-        List<GMapMarker> deviceMarkers;
+        //GMapMarker currentMarker;
+        //List<GMapMarker> deviceMarkers;
 
         // project data
         List<ProjectData> pList;
@@ -60,10 +61,16 @@ namespace Mirle_GPLC
             //textBox_searchProject.button
 
             // 初始化當前Marker為空值
-            currentMarker = null;
+            //currentMarker = null;
             // 載入專案資料
-            loadProjectData("");
-            refreshProjectData();
+            try
+            {
+                loadProjectData("");
+                refreshProjectData();
+            }
+            catch (Exception ex)
+            {
+            }
         }
 
         private void loadProjectData(string keyword)
