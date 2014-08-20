@@ -165,7 +165,8 @@ namespace Mirle.iMServer.Model
             using (DbConnection conn = db.getConnection())
             {
                 conn.Open();
-                MySqlCommand cmd = new MySqlCommand("SELECT * FROM " + table);
+                string cmdstr = string.Format("SELECT * FROM {0} LIMIT 1", table);
+                MySqlCommand cmd = new MySqlCommand(cmdstr);
                 //cmd.Parameters.AddWithValue("@table", tag.table);
                 cmd.Connection = conn as MySqlConnection;
                 using (MySqlDataReader reader = cmd.ExecuteReader())

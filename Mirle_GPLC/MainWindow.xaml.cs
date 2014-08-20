@@ -10,6 +10,7 @@ using GMap.NET.WindowsPresentation;
 using GMap.NET.MapProviders;
 using Mirle.iMServer.Model;
 using Mirle_GPLC.CustomeMarkers;
+using System;
 
 namespace Mirle_GPLC
 {
@@ -63,8 +64,14 @@ namespace Mirle_GPLC
             // 初始化當前Marker為空值
             currentMarker = null;
             // 載入專案資料
-            loadProjectData("");
-            refreshProjectData();
+            try
+            {
+                loadProjectData("");
+                refreshProjectData();
+            }
+            catch (Exception ex)
+            {
+            }
         }
 
         private void loadProjectData(string keyword)
@@ -173,9 +180,12 @@ namespace Mirle_GPLC
         private void projectListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ProjectData p = projectListView.SelectedItem as ProjectData;
-            projectFlyout.Header = p.name;
-            projectFlyout.IsOpen = true;
-            initFlyout(p);
+            if (p != null)
+            {
+                projectFlyout.Header = p.name;
+                projectFlyout.IsOpen = true;
+                initFlyout(p);
+            }
         }
 
         private void initFlyout(ProjectData project)
