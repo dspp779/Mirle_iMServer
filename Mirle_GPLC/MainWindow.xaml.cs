@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using GMap.NET;
+using System.Text.RegularExpressions;
 using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using GMap.NET;
 using GMap.NET.WindowsPresentation;
 using GMap.NET.MapProviders;
 using Mirle.iMServer.Model;
@@ -25,6 +18,8 @@ namespace Mirle_GPLC
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        private readonly MainWindowViewModel _viewModel;
+
         // marker
         GMapMarker currentMarker;
         List<GMapMarker> deviceMarkers;
@@ -34,8 +29,11 @@ namespace Mirle_GPLC
 
         public MainWindow()
         {
+            _viewModel = new MainWindowViewModel();
+            DataContext = _viewModel;
             InitializeComponent();
 
+            //this.Closing += new System.ComponentModel.CancelEventHandler(MetroWindow_Closing);
             // add your custom map db provider
             //MySQLPureImageCache ch = new MySQLPureImageCache();
             //ch.ConnectionString = @"server=sql2008;User Id=trolis;Persist Security Info=True;database=gmapnetcache;password=trolis;";
@@ -71,6 +69,8 @@ namespace Mirle_GPLC
 
         private void loadProjectData(string keyword)
         {
+            Regex reg = new Regex("\\s+");
+            keyword = reg.Replace(keyword.Trim(), " ");
             string[] strs = keyword.Split(' ');
             // 載入所有專案
             this.pList = ModelUtil.getProjectList(strs);
@@ -81,12 +81,12 @@ namespace Mirle_GPLC
             // 更新專案列表
             // 清空專案列表
             projectListView.Items.Clear();
+            gMap.Markers.Clear();
             // 加入專案列表
             foreach (ProjectData p in pList)
             {
                 GMapMarker pm = newProjectMarker(p);
                 projectListView.Items.Add(p);
-                newProjectMarker(p);
             }
         }
 
@@ -140,7 +140,60 @@ namespace Mirle_GPLC
             searchProject(textBox_searchProject.Text);
         }
 
+        private void textBox_searchTag_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            searchProject(textBox_searchTag.Text);
+        }
+
         #endregion
+
+        // 非同步視窗關閉確認
+        /*private async void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            bool _shutdown = false;
+            e.Cancel = !_shutdown;
+            var mySettings = new MetroDialogSettings()
+            {
+                AffirmativeButtonText = "確定",
+                NegativeButtonText = "取消",
+                AnimateShow = true,
+                AnimateHide = false
+            };
+
+            var result = await this.ShowMessageAsync(
+                "關閉地理資訊系統?", "確定要關閉地理資訊系統嗎?",
+                MessageDialogStyle.AffirmativeAndNegative, mySettings);
+
+            _shutdown = result == MessageDialogResult.Affirmative;
+            
+            if (_shutdown)
+                Application.Current.Shutdown();
+        }*/
+
+        private void projectListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ProjectData p = projectListView.SelectedItem as ProjectData;
+            projectFlyout.Header = p.name;
+            projectFlyout.IsOpen = true;
+            initFlyout(p);
+        }
+
+        private void initFlyout(ProjectData project)
+        {
+            textBlock_projectAddr.Text = project.addr;
+            projectTagTable.Items.Clear();
+
+            List<Device> devices = project.devices;
+
+            foreach (Device device in devices)
+            {
+                List<Tag> tags = device.tags;
+                foreach (Tag tag in tags)
+                {
+                    projectTagTable.Items.Add(tag);
+                }
+            }
+        }
 
     }
 }

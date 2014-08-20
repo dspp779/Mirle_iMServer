@@ -1,113 +1,145 @@
 ﻿<Controls:MetroWindow
-        x:Class="Mirle_GPLC.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        xmlns:my="clr-namespace:GMap.NET.WindowsPresentation;assembly=GMap.NET.WindowsPresentation"
-        xmlns:System="clr-namespace:System;assembly=mscorlib"
-        Title="Mirle GPLC" Width="1280" Height="720"
-        WindowStartupLocation="CenterScreen"
-        Loaded="Window_Loaded">
+    x:Class="Mirle_GPLC.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+    xmlns:Mirle_GPLC="clr-namespace:Mirle_GPLC"
+    xmlns:Dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+    xmlns:my="clr-namespace:GMap.NET.WindowsPresentation;assembly=GMap.NET.WindowsPresentation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:System="clr-namespace:System;assembly=mscorlib"
+    Icon="Mirle.logo.ico"
+    ShowIconOnTitleBar="False"
+    Title="Mirle GPLC" Width="960" Height="600" MinWidth="960"
+    WindowStartupLocation="CenterScreen"
+    GlowBrush="{DynamicResource AccentColorBrush}"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Mirle_GPLC:MainWindowViewModel}"
+    Loaded="Window_Loaded" Background="{DynamicResource Background}" ShowWindowCommandsOnTop="False">
 
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/VS/Colors.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/VS/Styles.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Mirle_GPLC;component/Resources/Icons.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatSlider.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Mirle_GPLC;component/Styles/VS/TabControl.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Mirle_GPLC;component/Styles/VS/Menu.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Mirle_GPLC;component/Styles/VS/ListBox.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Mirle_GPLC;component/Styles/VS/ScrollBar.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <Style x:Key="myListBoxItemStyle"
-               TargetType="{x:Type ListBoxItem}"
-               BasedOn="{StaticResource MetroListBoxItem}">
-                        <Setter Property="Height" Value="50" />
-            </Style>
-            <Style x:Key="myVSTabItemStyle"
-               TargetType="{x:Type TabItem}">
-                    <Setter Property="FocusVisualStyle"
-                        Value="{x:Null}" />
-                    <Setter Property="Background"
-                        Value="Transparent" />
-                    <Setter Property="Foreground"
-                        Value="#FFFFFF"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type TabItem}">
-                            <Grid Height="30"
-                                  Background="{TemplateBinding Background}"
-                                  SnapsToDevicePixels="true">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="25" />
-                                </Grid.ColumnDefinitions>
-                                <ContentPresenter Grid.Column="0"
-                                                  Margin="10,0,10,0"
-                                                  HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"
-                                                  ContentSource="Header" />
-                            </Grid>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsSelected"
-                                         Value="false">
-                                    <Setter Property="Background"
-                                            Value="Transparent" />
-                                </Trigger>
-                                <Trigger Property="IsMouseOver"
-                                         Value="true">
-                                    <Setter Property="Background"
-                                            Value="{DynamicResource BorderBrushSelected}" />
-                                </Trigger>
-                                <Trigger Property="IsSelected"
-                                         Value="true">
-                                    <Setter Property="Background"
-                                            Value="{DynamicResource BackgroundSelected}" />
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
+            <Style TargetType="ListBox" BasedOn="{StaticResource StandardListBox}" />
+            <Style TargetType="TabControl" BasedOn="{StaticResource StandardTabControl}" />
+            <Style TargetType="MenuItem" BasedOn="{StaticResource StandardMenuItem}" />
+            <Style TargetType="Menu" BasedOn="{StaticResource StandardMenu}" />
+
+            <Ellipse x:Key="AccentMenuIcon"
+                     x:Shared="False"
+                     Width="16"
+                     Height="16"
+                     Fill="{Binding ColorBrush, Mode=OneWay}" />
+            <Style x:Key="AccentColorMenuItemStyle"
+                   TargetType="{x:Type MenuItem}"
+                   BasedOn="{StaticResource StandardMenuItem}">
+                <Setter Property="Command"
+                        Value="{Binding ChangeAccentCommand}" />
+                <Setter Property="Icon"
+                        Value="{StaticResource AccentMenuIcon}" />
+                <Setter Property="Header"
+                        Value="{Binding Name, Mode=OneWay}" />
             </Style>
         </ResourceDictionary>
     </Window.Resources>
 
+    <Controls:MetroWindow.Flyouts>
+        <Controls:FlyoutsControl>
+            <Controls:Flyout Name="projectFlyout" Header="ProjectView" Position="Right"
+                             IsModal="True" MinWidth="600" Width="600" Theme="Adapt">
+
+                <Grid Margin="10,-15,10,10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition/>
+                        <RowDefinition Height="45"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Name="textBlock_projectAddr" Margin="55,0,10,0" TextWrapping="Wrap" Text="projectAddress" VerticalAlignment="Top" FontSize="14" Height="19"/>
+
+                    <DataGrid Name="projectTagTable" Margin="0,10" Grid.Row="1" ColumnWidth="*"
+                              HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="點位名稱" IsReadOnly="True" Binding="{Binding Path=log_name}"/>
+                            <DataGridTextColumn Header="監測值" IsReadOnly="True" Binding="{Binding Path=Value}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBox Name="textBox_searchTag" Controls:TextboxHelper.Watermark="搜尋點位..."
+                         Controls:TextboxHelper.ClearTextButton="True"
+                         Controls:TextboxHelper.ButtonCommand="{Binding TextBoxButtonCmd, Mode=OneWay}" Margin="10,0,0,10" Width="200" HorizontalAlignment="Left" Height="26" VerticalAlignment="Bottom" Grid.Row="2">
+                        <TextBox.Style>
+                            <Style TargetType="{x:Type TextBox}"
+                               BasedOn="{StaticResource SearchMetroTextBox}">
+                                <Style.Triggers>
+                                    <Trigger Property="Controls:TextboxHelper.HasText"
+                                         Value="True">
+                                        <Setter Property="Controls:TextboxHelper.ButtonTemplate"
+                                            Value="{DynamicResource ChromelessButtonTemplate}" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                </Grid>
+            </Controls:Flyout>
+        </Controls:FlyoutsControl>
+    </Controls:MetroWindow.Flyouts>
+
     <Controls:MetroContentControl>
         <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="5"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="1058*" />
             </Grid.ColumnDefinitions>
-            <ListBox HorizontalAlignment="Left" ItemContainerStyle="{StaticResource myListBoxItemStyle}" Margin="0,33,0,12" Name="projectListView" Width="200" FontSize="16" />
-            <Controls:Planerator HorizontalAlignment="Left" Margin="1395,-19,0,0" Name="planerator1" VerticalAlignment="Top" Grid.Column="1" />
-            <Controls:MetroAnimatedTabControl Name="tabControl1" ItemContainerStyle="{StaticResource myVSTabItemStyle}" Grid.ColumnSpan="2" Margin="199,0,0,0">
-
+            <ListBox HorizontalAlignment="Left" Margin="0,36,0,0" Name="projectListView" Width="200" FontSize="16" Grid.Row="1" SelectionChanged="projectListView_SelectionChanged"/>
+            <Controls:Planerator HorizontalAlignment="Left" Margin="1395,-19,-643,0" Name="planerator1" VerticalAlignment="Top" Grid.Column="1" Height="0" Width="0" />
+            <Controls:MetroAnimatedTabControl Name="tabControl1" Grid.Column="1" Grid.RowSpan="2" Background="{DynamicResource Background}">
                 <TabItem Header="地圖瀏覽" Name="tabItem_map">
                     <Grid>
                         <my:GMapControl Margin="0,0,0,0" Name="gMap" MaxZoom="20" MinZoom="3" MouseWheelZoomType="MousePositionWithoutCenter" />
                     </Grid>
                 </TabItem>
                 <TabItem Header="設定" Name="setting">
-                    <Grid Background="Black">
+                    <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="90" />
-                            <RowDefinition Height="561" />
+                            <RowDefinition Height="10" />
+                            <RowDefinition Height="50" />
+                            <RowDefinition Height="591"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="48" />
-                            <ColumnDefinition Width="1011*" />
+                            <ColumnDefinition Width="0" />
+                            <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <ComboBox Height="23" Name="comboBox_maptype" Width="120" SelectionChanged="comboBox_maptype_SelectionChanged" Margin="67,6,824,528" Grid.Column="1" Grid.Row="1" Background="Black">
+                        <ComboBox Height="26" Name="comboBox_maptype" Width="120" SelectionChanged="comboBox_maptype_SelectionChanged" Margin="71,5,0,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
                             <ComboBoxItem Content="Google地圖" IsSelected="True" />
                             <ComboBoxItem Content="Google地形地圖" />
                             <ComboBoxItem Content="OpenStreet地圖" />
                         </ComboBox>
-                        <TextBlock Name="textBlock_maptype" Text="地圖類型" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Width="53" Height="25" VerticalAlignment="Top" Margin="2,11,0,0" />
-                        <DockPanel Margin="0" Name="dockPanel1" Grid.ColumnSpan="2">
-                            <TextBlock Height="42" Name="textBlock_setting" Text="設定" FontSize="32" Width="68" />
-                        </DockPanel>
+                        <Menu Margin="10,10,667,552" Grid.ColumnSpan="2" Grid.Row="2" Background="{DynamicResource Background}">
+                            <MenuItem Header="主題顏色" ItemsSource="{Binding AccentColors, Mode=OneWay}"
+                                      ItemContainerStyle="{StaticResource AccentColorMenuItemStyle}" />
+                        </Menu>
+                        <DockPanel Margin="0" Name="dockPanel1" Grid.ColumnSpan="2"/>
+                        <TextBlock x:Name="textBlock_maptype" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="1" TextWrapping="Wrap" Text="地圖類型" VerticalAlignment="Top"/>
                     </Grid>
                 </TabItem>
             </Controls:MetroAnimatedTabControl>
-            <TextBox Height="23" Name="textBox_searchProject" VerticalAlignment="Top" Controls:TextboxHelper.Watermark="搜尋..."
+            <TextBox Height="26" Name="textBox_searchProject" VerticalAlignment="Top" Controls:TextboxHelper.Watermark="搜尋專案..."
                          Controls:TextboxHelper.ClearTextButton="True"
-                         Controls:TextboxHelper.ButtonCommand="{Binding TextBoxButtonCmd, Mode=OneWay}" Margin="5,0,6,0" TextChanged="textBox_searchProject_TextChanged">
+                         Controls:TextboxHelper.ButtonCommand="{Binding TextBoxButtonCmd, Mode=OneWay}" Margin="10,5,10,0" TextChanged="textBox_searchProject_TextChanged" Grid.Row="1">
                 <TextBox.Style>
                     <Style TargetType="{x:Type TextBox}"
                                BasedOn="{StaticResource SearchMetroTextBox}">
