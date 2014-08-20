@@ -39,3 +39,9 @@ Icon
 /Mirle_GPLC/bin/Debug
 /Mirle_GPLC/obj/Debug
 /Mirle.iMServer.Model/obj/Debug
+packages/*
+packages/GMap.NET.Presentation.1.7/lib/net40/GMap.NET.Core.xml
+packages/GMap.NET.Presentation.1.7/lib/net40/GMap.NET.WindowsPresentation.xml
+packages/GMap.NET.Presentation.1.7/lib/net40/GMap.NET.Core.xml
+packages/GMap.NET.Presentation.1.7/lib/net40/GMap.NET.WindowsPresentation.xml
+packages/MahApps.Metro.0.14.0.0/lib/net45/MahApps.Metro.XML
