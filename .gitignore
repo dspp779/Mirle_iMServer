@@ -26,7 +26,8 @@ $RECYCLE.BIN/
 .LSOverride
 
 # Icon must ends with two \r.
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -34,4 +35,7 @@ Icon
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
-/Mirle_GPLC/obj/Debug/Controls/ProjectView.baml
+/Mirle.iMServer.Model/bin/Debug
+/Mirle_GPLC/bin/Debug
+/Mirle_GPLC/obj/Debug
+/Mirle.iMServer.Model/obj/Debug
