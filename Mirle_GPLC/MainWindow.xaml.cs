@@ -179,12 +179,9 @@ namespace Mirle_GPLC
         private void projectListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ProjectData p = projectListView.SelectedItem as ProjectData;
-            if (p != null)
-            {
-                projectFlyout.Header = p.name;
-                projectFlyout.IsOpen = true;
-                initFlyout(p);
-            }
+            projectFlyout.Header = p.name;
+            projectFlyout.IsOpen = true;
+            initFlyout(p);
         }
 
         private void initFlyout(ProjectData project)
