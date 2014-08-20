@@ -54,7 +54,7 @@
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
             <Controls:Flyout Name="projectFlyout" Header="ProjectView" Position="Right"
-                             IsModal="True" MinWidth="600" Width="600" Theme="Adapt">
+                             IsModal="True" MinWidth="600" Theme="Adapt">
 
                 <Grid Margin="10,-15,10,10">
                     <Grid.RowDefinitions>

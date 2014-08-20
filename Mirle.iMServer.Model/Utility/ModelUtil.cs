@@ -6,15 +6,11 @@ using MySql.Data.MySqlClient;
 using Mirle.iMServer.Model;
 using System.Data.Common;
 using Mirle.iMServer.Model.Db;
-using System.Data;
 
 namespace Mirle.iMServer.Model
 {
     public class ModelUtil
     {
-        private static Dictionary<string, Dictionary<string, float?>> trendTableManager
-            = new Dictionary<string, Dictionary<string, float?>>();
-
         #region -- get project list --
         public static List<ProjectData> getProjectList()
         {
@@ -145,46 +141,24 @@ namespace Mirle.iMServer.Model
         }
         #endregion
 
-        public static float? getVal(Tag tag)
-        {
-            float? value = null;
-            Dictionary<string, float?> trendTable = null;
-            if (!trendTableManager.TryGetValue(tag.table, out trendTable))
-            {
-                trendTable = new Dictionary<string, float?>();
-                getRowVal(tag.table, trendTable);
-                trendTableManager.Add(tag.table, trendTable);
-            }
-            trendTable.TryGetValue(tag.log_id, out value);
-            return value;
-        }
-
-        private static void getRowVal(string table, Dictionary<string, float?> trendTable)
+        public static int getVal(Tag tag)
         {
             MySqlDbInterface db = new MySqlDbInterface();
             using (DbConnection conn = db.getConnection())
             {
                 conn.Open();
-                MySqlCommand cmd = new MySqlCommand("SELECT * FROM " + table);
+                MySqlCommand cmd = new MySqlCommand("SELECT " + tag.log_id + " FROM " + tag.table);
                 //cmd.Parameters.AddWithValue("@table", tag.table);
                 cmd.Connection = conn as MySqlConnection;
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
-                    DataTable schemaTable = reader.GetSchemaTable();
-                    if (reader.Read())
+                    while (reader.Read())
                     {
-                        foreach (DataRow row in schemaTable.Rows)
-                        {
-                            string columnName = row[schemaTable.Columns[0]].ToString();
-                            try
-                            {
-                                trendTable.Add(columnName, reader.GetFloat(columnName));
-                            }
-                            catch (Exception) { };
-                        }
+                        return reader.GetInt32(tag.log_id);
                     }
                 }
             }
+            return 0;
         }
     }
 }

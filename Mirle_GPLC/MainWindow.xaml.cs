@@ -21,7 +21,8 @@ namespace Mirle_GPLC
         private readonly MainWindowViewModel _viewModel;
 
         // marker
-        //GMapMarker currentMarker;
+        GMapMarker currentMarker;
+        List<GMapMarker> deviceMarkers;
 
         // project data
         List<ProjectData> pList;
@@ -59,7 +60,7 @@ namespace Mirle_GPLC
             //textBox_searchProject.button
 
             // 初始化當前Marker為空值
-            //currentMarker = null;
+            currentMarker = null;
             // 載入專案資料
             loadProjectData("");
             refreshProjectData();
