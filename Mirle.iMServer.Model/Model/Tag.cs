@@ -56,8 +56,8 @@ namespace Mirle.iMServer.Model
         public string Value
         {
             get {
-                int? i = ModelUtil.getVal(this);
-                return i!=null ? i.ToString():"null";
+                float? f = ModelUtil.getVal(this);
+                return f!=null ? f.ToString():"null";
             }
         }
 
