@@ -25,6 +25,9 @@ namespace Mirle_GPLC.CustomeMarkers
     /// </summary>
     public partial class ProjectMarker
     {
+        string markerHollowPath = "pack://application:,,,/Mirle_GPLC;component/CustomeMarkers/ProjectMarkerHollow.png";
+        string markerFillPath = "pack://application:,,,/Mirle_GPLC;component/CustomeMarkers/ProjectMarkerFill.png";
+
         Popup Popup;
         GMapMarker Marker;
         MainWindow mainWindow;
@@ -71,6 +74,7 @@ namespace Mirle_GPLC.CustomeMarkers
 
         void ProjectMarker_MouseLeave(object sender, MouseEventArgs e)
         {
+            icon.Source = new BitmapImage(new Uri(markerHollowPath));
             Marker.ZIndex -= 10000;
             Popup.IsOpen = false;
             Popup.Child = null;
@@ -78,6 +82,7 @@ namespace Mirle_GPLC.CustomeMarkers
 
         void ProjectMarker_MouseEnter(object sender, MouseEventArgs e)
         {
+            icon.Source = new BitmapImage(new Uri(markerFillPath));
             Marker.ZIndex += 10000;
             ProjectMarkerTooltip tooltip = new ProjectMarkerTooltip();
             tooltip.SetValues(Project);

@@ -17,15 +17,15 @@ namespace Mirle.iMServer.Model
         private int _io_addr;
         private Device _device;
 
-        public long id
+        public long ID
         {
             get { return _id; }
         }
-        public string table
+        public string Table
         {
             get { return _table; }
         }
-        public string name
+        public string Name
         {
             get { return _name; }
         }
@@ -33,15 +33,15 @@ namespace Mirle.iMServer.Model
         {
             get { return _log_id; }
         }
-        public string log_name
+        public string LogName
         {
             get { return _log_name; }
         }
-        public string tag
+        public string TagName
         {
             get { return _tag; }
         }
-        public string tag_memo
+        public string TagMemo
         {
             get { return _tag_memo; }
         }
@@ -49,9 +49,13 @@ namespace Mirle.iMServer.Model
         {
             get { return _io_addr; }
         }
-        public Device device
+        public Device Device
         {
             get { return _device; }
+        }
+        public string DeviceName
+        {
+            get { return _device.name; }
         }
         public string Value
         {

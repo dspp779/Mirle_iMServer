@@ -11,6 +11,8 @@ using GMap.NET.MapProviders;
 using Mirle.iMServer.Model;
 using Mirle_GPLC.CustomeMarkers;
 using System;
+using System.Windows.Data;
+using System.Collections.ObjectModel;
 
 namespace Mirle_GPLC
 {
@@ -35,6 +37,10 @@ namespace Mirle_GPLC
             DataContext = _viewModel;
             InitializeComponent();
 
+            projectList = ModelUtil.getProjectList();
+            tagList = projectList[0].tags;
+            var data = new ObservableCollection<Tag>(tagList);
+            _viewModel.DataSource = new ListCollectionView(data);
             // add your custom map db provider
             //MySQLPureImageCache ch = new MySQLPureImageCache();
             //ch.ConnectionString = @"server=sql2008;User Id=trolis;Persist Security Info=True;database=gmapnetcache;password=trolis;";
@@ -215,7 +221,17 @@ namespace Mirle_GPLC
                 Application.Current.Shutdown();
         }
 
-        /* mouse down event does not detect mouse down on listbox item,
+        // 專案選項變更事件處理
+        private void projectListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ProjectData p = projectListView.SelectedItem as ProjectData;
+            if (p != null)
+            {
+                selectProject(p);
+            }
+        }
+        /* selection change does not trigger when mouse down on the selected item
+         * and mouse down event does not trigger when mouse down on listbox item,
          * so use preview mouse down instead.
          * */
         private void projectListView_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -225,9 +241,12 @@ namespace Mirle_GPLC
                 e.OriginalSource as DependencyObject) as ListBoxItem;
             if (item != null)
             {
+                // get project data
                 ProjectData p = item.Content as ProjectData;
-                if (p != null)
-                    initProjectDataViewFlyout(p);
+                if (p != null && p.Equals(projectListView.SelectedItem))
+                {
+                    selectProject(p);
+                }
             }
             else
             {
@@ -245,7 +264,7 @@ namespace Mirle_GPLC
             textBlock_projectAddr.Text = project.addr;
             textBox_searchTag.Text = "";
             // 清空 Tag table
-            projectTagTable.Items.Clear();
+            //projectTagTable.Items.Clear();
             // 清空 Tag list
             tagList.Clear();
 
@@ -258,10 +277,13 @@ namespace Mirle_GPLC
                 tagList.AddRange(device.tags);
             }
             // 加入點位到Tag Table
-            foreach (Tag tag in tagList)
+            /*foreach (Tag tag in tagList)
             {
                 projectTagTable.Items.Add(tag);
-            }
+            }*/
+            // 分類
+            //var data = new ObservableCollection<Tag>(tagList);
+            //_viewModel.DataSource = new ListCollectionView(data);
             // 開啟Flyout
             projectFlyout.IsOpen = true;
         }
@@ -282,7 +304,15 @@ namespace Mirle_GPLC
         // 選擇專案
         public void selectProject(ProjectData project)
         {
+            // switch to map tab
+            tabControl1.SelectedItem = tabItem_map;
+            // switch seleted item
             projectListView.SelectedItem = project;
+            // map center to project and zoom
+            //gMap.Position = new PointLatLng(project.lat, project.lng);
+            //gMap.Zoom = 8;
+            //gMap.ReloadMap();
+            
             initProjectDataViewFlyout(project);
         }
     }

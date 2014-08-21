@@ -66,10 +66,58 @@
 
                     <TextBlock Name="textBlock_projectAddr" Margin="55,0,10,0" TextWrapping="Wrap" Text="projectAddress" VerticalAlignment="Top" FontSize="14" Height="19"/>
 
-                    <DataGrid Name="projectTagTable" Margin="0,10" Grid.Row="1" ColumnWidth="*"
-                              HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <DataGrid CanUserAddRows="False" AutoGenerateColumns="False"
+                              Name="projectTagTable" Margin="0,10" Grid.Row="1" ColumnWidth="*"
+                              HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" ItemsSource="{Binding DataSource}">
+                        <DataGrid.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.ContainerStyle>
+                                    <Style TargetType="{x:Type GroupItem}">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                    <Expander IsExpanded="True">
+                                                        <Expander.Style>
+                                                            <Style TargetType="{x:Type Expander}">
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding DeviceName}" Value="True">
+                                                                        <Setter Property="Background" Value="Blue"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding DeviceName}" Value="False">
+                                                                        <Setter Property="Background" Value="Violet"/>
+                                                                        <Setter Property="FontStyle" Value="Italic"/>
+                                                                        <Setter Property="Foreground" Value="Gray"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Expander.Style>
+                                                        <Expander.Header>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="{Binding DeviceName}" Margin="5 2 5 2"/>
+                                                                <TextBlock Text=":" Margin="0 2 5 2"/>
+                                                                <TextBlock Text="{Binding ItemCount}" Margin="0 2 0 2"/>
+                                                            </StackPanel>
+                                                        </Expander.Header>
+                                                        <ItemsPresenter />
+                                                    </Expander>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </GroupStyle.ContainerStyle>
+                            </GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Background="LightSteelBlue">
+                                            <TextBlock Text="{Binding DeviceName}" Foreground="Black" Margin="5 2 5 2"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                            </GroupStyle>
+                        </DataGrid.GroupStyle>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="點位名稱" IsReadOnly="True" Binding="{Binding Path=log_name}"/>
+                            <DataGridTextColumn Header="點位名稱" IsReadOnly="True" Binding="{Binding Path=LogName}"/>
                             <DataGridTextColumn Header="監測值" IsReadOnly="True" Binding="{Binding Path=Value}" />
                         </DataGrid.Columns>
                     </DataGrid>
@@ -105,7 +153,7 @@
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="1058*" />
             </Grid.ColumnDefinitions>
-            <ListBox HorizontalAlignment="Left" Margin="0,36,0,0" Name="projectListView" Width="200" FontSize="16" Grid.Row="1" PreviewMouseDown="projectListView_PreviewMouseDown"/>
+            <ListBox HorizontalAlignment="Left" Margin="0,36,0,0" Name="projectListView" Width="200" FontSize="16" Grid.Row="1" PreviewMouseDown="projectListView_PreviewMouseDown" SelectionChanged="projectListView_SelectionChanged"/>
             <Controls:Planerator HorizontalAlignment="Left" Margin="1395,-19,-643,0" Name="planerator1" VerticalAlignment="Top" Grid.Column="1" Height="0" Width="0" />
             <Controls:MetroAnimatedTabControl Name="tabControl1" Grid.Column="1" Grid.RowSpan="2" Background="{DynamicResource Background}">
                 <TabItem Header="地圖瀏覽" Name="tabItem_map">

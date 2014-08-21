@@ -50,7 +50,19 @@ namespace Mirle.iMServer.Model
                 return _devices;
             }
         }
-
+        public List<Tag> tags
+        {
+            get
+            {
+                List<Tag> tagList = new List<Tag>();
+                foreach(Device device in devices)
+                {
+                    tagList.AddRange(device.tags);
+                }
+                return tagList;
+            }
+        }
+        
         public ProjectData(Int64 id, string name, string alias, string addr, double lat, double lng)
         {
             this._id = id;

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -117,5 +118,15 @@ namespace Mirle_GPLC
 
         public string Error { get { return string.Empty; } }
 
+        private ListCollectionView _dataSource;
+        public ListCollectionView DataSource
+        {
+            get { return _dataSource; }
+            set
+            {
+                _dataSource = value;
+                _dataSource.GroupDescriptions.Add(new PropertyGroupDescription("DeviceName"));
+            }
+        }
     }
 }

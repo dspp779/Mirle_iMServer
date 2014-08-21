@@ -149,11 +149,11 @@ namespace Mirle.iMServer.Model
         {
             float? value = null;
             Dictionary<string, float?> trendTable = null;
-            if (!trendTableManager.TryGetValue(tag.table, out trendTable))
+            if (!trendTableManager.TryGetValue(tag.Table, out trendTable))
             {
                 trendTable = new Dictionary<string, float?>();
-                getRowVal(tag.table, trendTable);
-                trendTableManager.Add(tag.table, trendTable);
+                getRowVal(tag.Table, trendTable);
+                trendTableManager.Add(tag.Table, trendTable);
             }
             trendTable.TryGetValue(tag.log_id, out value);
             return value;
