@@ -76,5 +76,21 @@ namespace Mirle.iMServer.Model
             this._device = device;
         }
 
+        public bool containsKeyword(string[] keywords)
+        {
+            foreach (string keyword in keywords)
+            {
+                if (!_log_name.Contains(keyword))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public override string ToString()
+        {
+            return _log_name;
+        }
     }
 }

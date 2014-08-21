@@ -26,7 +26,8 @@ namespace Mirle_GPLC
         //List<GMapMarker> deviceMarkers;
 
         // project data
-        List<ProjectData> pList;
+        List<ProjectData> projectList;
+        List<Tag> tagList = new List<Tag>();
 
         public MainWindow()
         {
@@ -58,31 +59,23 @@ namespace Mirle_GPLC
             // 設定初始位置
             gMap.Position = new PointLatLng(23.8, 121);
 
-            //textBox_searchProject.button
 
             // 初始化當前Marker為空值
             //currentMarker = null;
-            // 載入專案資料
             try
             {
-                loadProjectData("");
-                refreshProjectData();
+                // 載入專案資料
+                this.projectList = ModelUtil.getProjectList();
+                // 加入專案列表
+                refreshProjectData(projectList);
             }
             catch (Exception)
             {
+                messageDialog("發生錯誤", "載入專案資料時發生錯誤");
             }
         }
 
-        private void loadProjectData(string keyword)
-        {
-            Regex reg = new Regex("\\s+");
-            keyword = reg.Replace(keyword.Trim(), " ");
-            string[] strs = keyword.Split(' ');
-            // 載入所有專案
-            this.pList = ModelUtil.getProjectList(strs);
-        }
-
-        private void refreshProjectData()
+        private void refreshProjectData(List<ProjectData> pList)
         {
             // 更新專案列表
             // 清空專案列表
@@ -96,10 +89,68 @@ namespace Mirle_GPLC
             }
         }
 
-        private void searchProject(string keyword)
+        private void searchProject(string keywordCommand)
         {
-            loadProjectData(keyword);
-            refreshProjectData();
+            string[] keywordList = parseKeyword(keywordCommand);
+
+            foreach (ProjectData p in projectList)
+            {
+                // removal phase
+                if (projectListView.Items.Contains(p))
+                {
+                    if(!p.containsKeyword(keywordList))
+                        projectListView.Items.Remove(p);
+                }
+                // add back phase
+                else
+                {
+                    if(p.containsKeyword(keywordList))
+                        projectListView.Items.Add(p);
+                }
+            }
+        }
+
+        private void searchTag(string keywordCommand)
+        {
+            string[] keywordList = parseKeyword(keywordCommand);
+
+            foreach (Tag t in tagList)
+            {
+                // removal phase
+                if (projectTagTable.Items.Contains(t))
+                {
+                    if (!t.containsKeyword(keywordList))
+                        projectTagTable.Items.Remove(t);
+                }
+                // add back phase
+                else
+                {
+                    if (t.containsKeyword(keywordList))
+                        projectTagTable.Items.Add(t);
+                }
+            }
+        }
+
+        private string[] parseKeyword(string keyword)
+        {
+            string Bopomofo = "[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˊˇˋ˙]+";
+            Regex reg = new Regex(Bopomofo);
+            keyword = reg.Replace(keyword, "");
+            reg = new Regex("\\s+");
+            keyword = reg.Replace(keyword.Trim(), " ");
+            return keyword.Split(' ');
+        }
+
+        private bool containsKeyword(string target, string[] keywords)
+        {
+            foreach (string keyword in keywords)
+            {
+                if (target.Contains(keyword))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         #region -- marker functions --
@@ -125,6 +176,7 @@ namespace Mirle_GPLC
 
         #region -- Event Handlers --
 
+        // 地圖選項
         private void comboBox_maptype_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             switch(comboBox_maptype.SelectedIndex)
@@ -148,10 +200,9 @@ namespace Mirle_GPLC
 
         private void textBox_searchTag_TextChanged(object sender, TextChangedEventArgs e)
         {
-            searchProject(textBox_searchTag.Text);
+            
+            searchTag(textBox_searchTag.Text);
         }
-
-        #endregion
 
         // 非同步視窗關閉確認
         private async void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -171,38 +222,73 @@ namespace Mirle_GPLC
                 MessageDialogStyle.AffirmativeAndNegative, mySettings);
 
             _shutdown = result == MessageDialogResult.Affirmative;
-            
+
             if (_shutdown)
                 Application.Current.Shutdown();
         }
 
-        private void projectListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        /* mouse down event does not detect mouse down on listbox item,
+         * so use preview mouse down instead.
+         * */
+        private void projectListView_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            ProjectData p = projectListView.SelectedItem as ProjectData;
-            if (p != null)
+            // get newly selected listbox item
+            var item = ItemsControl.ContainerFromElement(projectListView,
+                e.OriginalSource as DependencyObject) as ListBoxItem;
+            if (item != null)
             {
-                projectFlyout.Header = p.name;
-                projectFlyout.IsOpen = true;
-                initFlyout(p);
+                ProjectData p = item.Content as ProjectData;
+                if (p != null)
+                    initProjectDataViewFlyout(p);
+            }
+            else
+            {
+                projectListView.UnselectAll();
             }
         }
 
-        private void initFlyout(ProjectData project)
-        {
-            textBlock_projectAddr.Text = project.addr;
-            projectTagTable.Items.Clear();
+        #endregion
 
+        // 開啟專案內容瀏覽畫面
+        private void initProjectDataViewFlyout(ProjectData project)
+        {
+            // 初始化專案內容瀏覽畫面
+            projectFlyout.Header = project.name;
+            textBlock_projectAddr.Text = project.addr;
+            textBox_searchTag.Text = "";
+            // 清空 Tag table
+            projectTagTable.Items.Clear();
+            // 清空 Tag list
+            tagList.Clear();
+
+            // 讀取專案內的裝置
             List<Device> devices = project.devices;
 
+            // 加入所有裝置的點位到Tag List
             foreach (Device device in devices)
             {
-                List<Tag> tags = device.tags;
-                foreach (Tag tag in tags)
-                {
-                    projectTagTable.Items.Add(tag);
-                }
+                tagList.AddRange(device.tags);
             }
+            // 加入點位到Tag Table
+            foreach (Tag tag in tagList)
+            {
+                projectTagTable.Items.Add(tag);
+            }
+            // 開啟Flyout
+            projectFlyout.IsOpen = true;
         }
 
+        // 非同步對話方塊
+        private async void messageDialog(string title, string message)
+        {
+            var mySettings = new MetroDialogSettings()
+            {
+                AffirmativeButtonText = "確定",
+                AnimateShow = true,
+                AnimateHide = false
+            };
+
+            await this.ShowMessageAsync(title, message, MessageDialogStyle.Affirmative, mySettings);
+        }
     }
 }

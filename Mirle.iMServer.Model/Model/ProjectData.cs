@@ -61,6 +61,18 @@ namespace Mirle.iMServer.Model
             this._lng = lng;
         }
 
+        public bool containsKeyword(string[] keywords)
+        {
+            foreach (string keyword in keywords)
+            {
+                if (name.Contains(keyword))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public override string ToString()
         {
             return name;

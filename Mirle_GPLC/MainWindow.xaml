@@ -11,12 +11,12 @@
     xmlns:System="clr-namespace:System;assembly=mscorlib"
     Icon="Mirle.logo.ico"
     ShowIconOnTitleBar="False"
-    Title="Mirle GPLC" Width="960" Height="600" MinWidth="960"
+    Title="Mirle GPLC" Width="960" Height="600" MinWidth="960" MinHeight="600"
     WindowStartupLocation="CenterScreen"
     GlowBrush="{DynamicResource AccentColorBrush}"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Mirle_GPLC:MainWindowViewModel}"
-    Loaded="Window_Loaded" Closing="MetroWindow_Closing" Background="{DynamicResource Background}" ShowWindowCommandsOnTop="False">
+    Loaded="Window_Loaded" Closing="MetroWindow_Closing" Background="{DynamicResource Background}">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -54,7 +54,8 @@
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
             <Controls:Flyout Name="projectFlyout" Header="ProjectView" Position="Right"
-                             IsModal="True" MinWidth="600" Width="600" Theme="Adapt">
+                             IsModal="True" MinWidth="600" Width="600" Theme="Accent"
+                             Foreground="{DynamicResource IdealForegroundColorBrush}">
 
                 <Grid Margin="10,-15,10,10">
                     <Grid.RowDefinitions>
@@ -75,7 +76,7 @@
 
                     <TextBox Name="textBox_searchTag" Controls:TextboxHelper.Watermark="搜尋點位..."
                          Controls:TextboxHelper.ClearTextButton="True"
-                         Controls:TextboxHelper.ButtonCommand="{Binding TextBoxButtonCmd, Mode=OneWay}" Margin="10,0,0,10" Width="200" HorizontalAlignment="Left" Height="26" VerticalAlignment="Bottom" Grid.Row="2">
+                         Controls:TextboxHelper.ButtonCommand="{Binding TextBoxButtonCmd, Mode=OneWay}" Margin="10,0,0,10" Width="200" HorizontalAlignment="Left" Height="26" VerticalAlignment="Bottom" Grid.Row="2" TextChanged="textBox_searchTag_TextChanged">
                         <TextBox.Style>
                             <Style TargetType="{x:Type TextBox}"
                                BasedOn="{StaticResource SearchMetroTextBox}">
@@ -104,7 +105,7 @@
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="1058*" />
             </Grid.ColumnDefinitions>
-            <ListBox HorizontalAlignment="Left" Margin="0,36,0,0" Name="projectListView" Width="200" FontSize="16" Grid.Row="1" SelectionChanged="projectListView_SelectionChanged"/>
+            <ListBox HorizontalAlignment="Left" Margin="0,36,0,0" Name="projectListView" Width="200" FontSize="16" Grid.Row="1" PreviewMouseDown="projectListView_PreviewMouseDown"/>
             <Controls:Planerator HorizontalAlignment="Left" Margin="1395,-19,-643,0" Name="planerator1" VerticalAlignment="Top" Grid.Column="1" Height="0" Width="0" />
             <Controls:MetroAnimatedTabControl Name="tabControl1" Grid.Column="1" Grid.RowSpan="2" Background="{DynamicResource Background}">
                 <TabItem Header="地圖瀏覽" Name="tabItem_map">
