@@ -69,9 +69,9 @@ namespace Mirle_GPLC
                 // 加入專案列表
                 refreshProjectData(projectList);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                messageDialog("發生錯誤", "載入專案資料時發生錯誤");
+                messageDialog("發生錯誤", "載入專案資料時發生錯誤\n"+ex.Message);
             }
         }
 
@@ -141,18 +141,6 @@ namespace Mirle_GPLC
             return keyword.Split(' ');
         }
 
-        private bool containsKeyword(string target, string[] keywords)
-        {
-            foreach (string keyword in keywords)
-            {
-                if (target.Contains(keyword))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         #region -- marker functions --
         private GMapMarker newProjectMarker(ProjectData p)
         {
@@ -161,7 +149,7 @@ namespace Mirle_GPLC
         private GMapMarker newProjectMarker(PointLatLng latlng, ProjectData p)
         {
             GMapMarker marker = new GMapMarker(latlng);
-            marker.Shape = new ProjectMarker(gMap, marker, p);
+            marker.Shape = new ProjectMarker(this, marker, p);
             addMarker(marker);
             return marker;
         }
@@ -289,6 +277,13 @@ namespace Mirle_GPLC
             };
 
             await this.ShowMessageAsync(title, message, MessageDialogStyle.Affirmative, mySettings);
+        }
+
+        // 選擇專案
+        public void selectProject(ProjectData project)
+        {
+            projectListView.SelectedItem = project;
+            initProjectDataViewFlyout(project);
         }
     }
 }

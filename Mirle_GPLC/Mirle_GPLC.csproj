@@ -131,6 +131,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\ProjectMarkerTooltip.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="CustomeMarkers\ProjectMarker.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -145,6 +149,9 @@
     </Compile>
     <Compile Include="Controls\ProjectView.xaml.cs">
       <DependentUpon>ProjectView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ProjectMarkerTooltip.xaml.cs">
+      <DependentUpon>ProjectMarkerTooltip.xaml</DependentUpon>
     </Compile>
     <Compile Include="CustomeMarkers\ProjectMarker.xaml.cs">
       <DependentUpon>ProjectMarker.xaml</DependentUpon>

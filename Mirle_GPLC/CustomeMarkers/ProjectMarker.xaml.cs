@@ -15,6 +15,8 @@ using System.Windows.Controls.Primitives;
 using GMap.NET.WindowsPresentation;
 using Mirle.iMServer.Model;
 using GMap.NET;
+using Mirle_GPLC.Controls;
+using MahApps.Metro.Controls;
 
 namespace Mirle_GPLC.CustomeMarkers
 {
@@ -24,45 +26,25 @@ namespace Mirle_GPLC.CustomeMarkers
     public partial class ProjectMarker
     {
         Popup Popup;
-        Label Label;
         GMapMarker Marker;
-        GMapControl gMap;
+        MainWindow mainWindow;
         public ProjectData Project;
 
-        public ProjectMarker(GMapControl gMap, GMapMarker marker, ProjectData project)
+        public ProjectMarker(MainWindow mainWindow , GMapMarker marker, ProjectData project)
         {
             InitializeComponent();
 
-            this.gMap = gMap;
+            this.mainWindow = mainWindow;
             this.Marker = marker;
             this.Project = project;
+
+            initProjectMarker();
         }
 
         private void initProjectMarker()
         {
-            
             Popup = new Popup();
-            Label = new Label();
-
-            this.Loaded += new RoutedEventHandler(PojectMarker_Loaded);
-            this.SizeChanged += new SizeChangedEventHandler(ProjectMarker_SizeChanged);
-            this.MouseEnter += new MouseEventHandler(ProjectMarker_MouseEnter);
-            this.MouseLeave += new MouseEventHandler(ProjectMarker_MouseLeave);
-            this.MouseMove += new MouseEventHandler(ProjectMarker_MouseMove);
-            this.MouseLeftButtonUp += new MouseButtonEventHandler(ProjectMarker_MouseLeftButtonUp);
-            this.MouseLeftButtonDown += new MouseButtonEventHandler(ProjectMarker_MouseLeftButtonDown);
-
             Popup.Placement = PlacementMode.Mouse;
-            {
-                Label.Background = Brushes.Blue;
-                Label.Foreground = Brushes.White;
-                Label.BorderBrush = Brushes.WhiteSmoke;
-                Label.BorderThickness = new Thickness(2);
-                Label.Padding = new Thickness(5);
-                Label.FontSize = 22;
-                Label.Content = Project.name;
-            }
-            Popup.Child = Label;
         }
 
         void PojectMarker_Loaded(object sender, RoutedEventArgs e)
@@ -78,40 +60,28 @@ namespace Mirle_GPLC.CustomeMarkers
             Marker.Offset = new Point(-e.NewSize.Width / 2, -e.NewSize.Height / 2);
         }
 
-        void ProjectMarker_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed && IsMouseCaptured)
-            {
-                Point p = e.GetPosition(gMap);
-                Marker.Position = gMap.FromLocalToLatLng((int)p.X, (int)p.Y);
-            }
-        }
-
         void ProjectMarker_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (!IsMouseCaptured)
-            {
-                Mouse.Capture(this);
-            }
         }
 
         void ProjectMarker_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (IsMouseCaptured)
-            {
-                Mouse.Capture(null);
-            }
+            mainWindow.selectProject(Project);
         }
 
         void ProjectMarker_MouseLeave(object sender, MouseEventArgs e)
         {
             Marker.ZIndex -= 10000;
             Popup.IsOpen = false;
+            Popup.Child = null;
         }
 
         void ProjectMarker_MouseEnter(object sender, MouseEventArgs e)
         {
             Marker.ZIndex += 10000;
+            ProjectMarkerTooltip tooltip = new ProjectMarkerTooltip();
+            tooltip.SetValues(Project);
+            Popup.Child = tooltip;
             Popup.IsOpen = true;
         }
 
@@ -134,6 +104,7 @@ namespace Mirle_GPLC.CustomeMarkers
          */
         private void ProjectMarker_MouseWheel(object sender, MouseWheelEventArgs e)
         {
+            GMapControl gMap = mainWindow.gMap;
             // latlng position of the project
             PointLatLng projectPosition = new PointLatLng(Project.lat, Project.lng);
 
