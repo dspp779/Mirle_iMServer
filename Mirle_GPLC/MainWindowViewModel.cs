@@ -1,4 +1,5 @@
-﻿using MahApps.Metro;
+﻿using GMap.NET.MapProviders;
+using MahApps.Metro;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -118,6 +119,21 @@ namespace Mirle_GPLC
 
         public string Error { get { return string.Empty; } }
 
+        // 地圖選項的資料繫結
+        private List<GMapProvider> _mapProviders
+            = new List<GMapProvider> {
+                GoogleMapProvider.Instance,
+                GoogleTerrainMapProvider.Instance,
+                OpenStreetMapProvider.Instance,
+                BingMapProvider.Instance
+            };
+        public List<GMapProvider> GMapProviderList
+        {
+            get { return _mapProviders; }
+        }
+
+
+        // Tag Table的資料來源
         private ListCollectionView _dataSource;
         public ListCollectionView DataSource
         {

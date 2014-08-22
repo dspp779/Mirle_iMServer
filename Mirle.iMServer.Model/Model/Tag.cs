@@ -5,8 +5,10 @@ using System.Text;
 
 namespace Mirle.iMServer.Model
 {
-    public class Tag
+    public class TagData
     {
+        public static TagData Empty = new TagData();
+
         private long _id;
         private string _table;
         private string _name;
@@ -15,7 +17,7 @@ namespace Mirle.iMServer.Model
         private string _tag;
         private string _tag_memo;
         private int _io_addr;
-        private Device _device;
+        private DeviceData _device;
 
         public long ID
         {
@@ -49,7 +51,7 @@ namespace Mirle.iMServer.Model
         {
             get { return _io_addr; }
         }
-        public Device Device
+        public DeviceData Device
         {
             get { return _device; }
         }
@@ -61,13 +63,19 @@ namespace Mirle.iMServer.Model
         {
             get
             {
-                float? f = ModelUtil.getVal(this);
-                return f != null ? f.ToString() : "null";
+                return getTextVal();
             }
         }
 
-        public Tag(long id, string table, string name, string log_id, string log_name,
-            string tag, string tag_memo, int io_addr, Device device)
+        public TagData()
+        {
+            _id = _io_addr = 0;
+            _table = _name = _log_id = _log_name = _tag = _tag_memo = "EmptyTag";
+            _device = DeviceData.Empty;
+        }
+
+        public TagData(long id, string table, string name, string log_id, string log_name,
+            string tag, string tag_memo, int io_addr, DeviceData device)
         {
             this._id = id;
             this._table = table;
@@ -80,6 +88,9 @@ namespace Mirle.iMServer.Model
             this._device = device;
         }
 
+        /* check if tag satisfy keyword rule
+         * note: AND rule is used int this method
+         * */
         public bool containsKeyword(string[] keywords)
         {
             foreach (string keyword in keywords)
@@ -95,6 +106,18 @@ namespace Mirle.iMServer.Model
         public override string ToString()
         {
             return _log_name;
+        }
+
+        private float? getNumericVal()
+        {
+            float? f = ModelUtil.getTagVal(this);
+            return f != null ? f : null;
+        }
+
+        private string getTextVal()
+        {
+            float? f = ModelUtil.getTagVal(this);
+            return f != null ? f.ToString() : "null";
         }
     }
 }

@@ -12,6 +12,7 @@ namespace Mirle.iMServer.Model
 {
     public class ModelUtil
     {
+        // 監測值資料快取
         private static Dictionary<string, Dictionary<string, float?>> trendTableManager
             = new Dictionary<string, Dictionary<string, float?>>();
 
@@ -84,9 +85,9 @@ namespace Mirle.iMServer.Model
         #endregion
 
         #region -- get device list --
-        public static List<Device> getDeviceList(ProjectData project)
+        public static List<DeviceData> getDeviceList(ProjectData project)
         {
-            List<Device> dList = new List<Device>();
+            List<DeviceData> dList = new List<DeviceData>();
             MySqlDbInterface db = new MySqlDbInterface();
             using (DbConnection conn = db.getConnection())
             {
@@ -98,14 +99,14 @@ namespace Mirle.iMServer.Model
             }
             return dList;
         }
-        public static void getDeviceList(MySqlCommand cmd, ProjectData project, List<Device> dList)
+        public static void getDeviceList(MySqlCommand cmd, ProjectData project, List<DeviceData> dList)
         {
             using (MySqlDataReader reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
                     // get column values
-                    Device d = new Device(project, reader.GetString("device"));
+                    DeviceData d = new DeviceData(project, reader.GetString("device"));
                     dList.Add(d);
                 }
             }
@@ -114,9 +115,9 @@ namespace Mirle.iMServer.Model
 
         #region -- get tag list --
 
-        public static List<Tag> getTagList(Device device)
+        public static List<TagData> getTagList(DeviceData device)
         {
-            List<Tag> tList = new List<Tag>();
+            List<TagData> tList = new List<TagData>();
             MySqlDbInterface db = new MySqlDbInterface();
             using (DbConnection conn = db.getConnection())
             {
@@ -128,7 +129,7 @@ namespace Mirle.iMServer.Model
             }
             return tList;
         }
-        public static void getTagList(MySqlCommand cmd, Device device, List<Tag> dList)
+        public static void getTagList(MySqlCommand cmd, DeviceData device, List<TagData> dList)
         {
             using (MySqlDataReader reader = cmd.ExecuteReader())
             {
@@ -136,7 +137,7 @@ namespace Mirle.iMServer.Model
                 {
                     // get column values
                     dList.Add(
-                        new Tag(reader.GetInt64("id"), reader.GetString("table"), reader.GetString("name"),
+                        new TagData(reader.GetInt64("id"), reader.GetString("table"), reader.GetString("name"),
                             reader.GetString("logid"), reader.GetString("log"), reader.GetString("tag"),
                             reader.GetString("tag_memo"), reader.GetInt32("io_addr"), device)
                     );
@@ -145,27 +146,32 @@ namespace Mirle.iMServer.Model
         }
         #endregion
 
-        public static float? getVal(Tag tag)
+        public static float? getTagVal(TagData tag)
         {
             float? value = null;
             Dictionary<string, float?> trendTable = null;
+            // 檢查監測資料是否已經讀取
             if (!trendTableManager.TryGetValue(tag.Table, out trendTable))
             {
+                // 未讀取，新增字典供監測資料讀取
                 trendTable = new Dictionary<string, float?>();
-                getRowVal(tag.Table, trendTable);
+                // 監測資料讀取
+                refreshRowVal(tag.Table, trendTable);
+                // 存放在trenTableManager
                 trendTableManager.Add(tag.Table, trendTable);
             }
             trendTable.TryGetValue(tag.log_id, out value);
             return value;
         }
 
-        private static void getRowVal(string table, Dictionary<string, float?> trendTable)
+        private static void refreshRowVal(string table, Dictionary<string, float?> trendTable)
         {
             MySqlDbInterface db = new MySqlDbInterface();
             using (DbConnection conn = db.getConnection())
             {
                 conn.Open();
-                string cmdstr = string.Format("SELECT * FROM {0} LIMIT 1", table);
+                // get the newest row
+                string cmdstr = string.Format("SELECT * FROM {0} ORDER BY 'datetime' LIMIT 1", table);
                 MySqlCommand cmd = new MySqlCommand(cmdstr);
                 //cmd.Parameters.AddWithValue("@table", tag.table);
                 cmd.Connection = conn as MySqlConnection;
@@ -187,5 +193,6 @@ namespace Mirle.iMServer.Model
                 }
             }
         }
+
     }
 }

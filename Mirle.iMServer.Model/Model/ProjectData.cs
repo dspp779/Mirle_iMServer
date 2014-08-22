@@ -7,13 +7,15 @@ namespace Mirle.iMServer.Model
 {
     public class ProjectData
     {
+        public static ProjectData Empty = new ProjectData();
+
         private long _id;
         private string _name;
         private string _alias;
         private string _addr;
         private double _lat;
         private double _lng;
-        private List<Device> _devices;
+        private List<DeviceData> _devices;
 
         public Int64 id
         {
@@ -39,7 +41,7 @@ namespace Mirle.iMServer.Model
         {
             get { return _lng; }
         }
-        public List<Device> devices
+        public List<DeviceData> devices
         {
             get
             {
@@ -50,19 +52,26 @@ namespace Mirle.iMServer.Model
                 return _devices;
             }
         }
-        public List<Tag> tags
+        public List<TagData> tags
         {
             get
             {
-                List<Tag> tagList = new List<Tag>();
-                foreach(Device device in devices)
+                List<TagData> tagList = new List<TagData>();
+                foreach(DeviceData device in devices)
                 {
                     tagList.AddRange(device.tags);
                 }
                 return tagList;
             }
         }
-        
+
+        public ProjectData()
+        {
+            _lat = _lng = _id = 0;
+            _name = _alias = _addr = "EmptyProject";
+            _devices = new List<DeviceData> { DeviceData.Empty };
+        }
+
         public ProjectData(Int64 id, string name, string alias, string addr, double lat, double lng)
         {
             this._id = id;

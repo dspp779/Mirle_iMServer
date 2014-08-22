@@ -29,7 +29,9 @@ namespace Mirle_GPLC
 
         // project data
         List<ProjectData> projectList;
-        List<Tag> tagList = new List<Tag>();
+        List<TagData> tagList = new List<TagData>();
+
+        ListCollectionView TagDataSource;
 
         public MainWindow()
         {
@@ -37,10 +39,12 @@ namespace Mirle_GPLC
             DataContext = _viewModel;
             InitializeComponent();
 
-            projectList = ModelUtil.getProjectList();
-            tagList = projectList[0].tags;
-            var data = new ObservableCollection<Tag>(tagList);
-            _viewModel.DataSource = new ListCollectionView(data);
+            // 初始化Tag Table
+            tagList.Add(TagData.Empty);
+            var data = new ObservableCollection<TagData>(tagList);
+            TagDataSource = new ListCollectionView(data);
+            _viewModel.DataSource = TagDataSource;
+
             // add your custom map db provider
             //MySQLPureImageCache ch = new MySQLPureImageCache();
             //ch.ConnectionString = @"server=sql2008;User Id=trolis;Persist Security Info=True;database=gmapnetcache;password=trolis;";
@@ -66,8 +70,8 @@ namespace Mirle_GPLC
             gMap.Position = new PointLatLng(23.8, 121);
 
 
-            // 初始化當前Marker為空值
-            //currentMarker = null;
+            // 初始化地圖選擇方塊
+            comboBox_maptype.SelectedItem = gMap.MapProvider;
             try
             {
                 // 載入專案資料
@@ -120,19 +124,19 @@ namespace Mirle_GPLC
         {
             string[] keywordList = parseKeyword(keywordCommand);
 
-            foreach (Tag t in tagList)
+            foreach (TagData t in tagList)
             {
                 // removal phase
-                if (projectTagTable.Items.Contains(t))
+                if (TagDataSource.Contains(t))
                 {
                     if (!t.containsKeyword(keywordList))
-                        projectTagTable.Items.Remove(t);
+                        TagDataSource.Remove(t);
                 }
                 // add back phase
                 else
                 {
                     if (t.containsKeyword(keywordList))
-                        projectTagTable.Items.Add(t);
+                        TagTableAdd(t);
                 }
             }
         }
@@ -170,7 +174,7 @@ namespace Mirle_GPLC
 
         #region -- Event Handlers --
 
-        // 地圖選項
+        // 地圖選擇改變事件處理
         private void comboBox_maptype_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             switch(comboBox_maptype.SelectedIndex)
@@ -187,11 +191,13 @@ namespace Mirle_GPLC
             }
         }
 
+        // 搜尋Project文字方塊文字變更事件處理
         private void textBox_searchProject_TextChanged(object sender, TextChangedEventArgs e)
         {
             searchProject(textBox_searchProject.Text);
         }
 
+        // 搜尋Tag文字方塊文字變更事件處理
         private void textBox_searchTag_TextChanged(object sender, TextChangedEventArgs e)
         {
             
@@ -230,19 +236,27 @@ namespace Mirle_GPLC
                 selectProject(p);
             }
         }
+
         /* selection change does not trigger when mouse down on the selected item
          * and mouse down event does not trigger when mouse down on listbox item,
          * so use preview mouse down instead.
+         * selectionChanged 在使用者對已選擇項目按下按鈕時不會觸發
+         * mouseDown 則不會在項目被按下時觸發
+         * 所以使用previewMouseDown
+         * 專門針對使用者對已選擇項目按下按鈕，開啟專案資料瀏覽
          * */
         private void projectListView_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             // get newly selected listbox item
+            // PreviewMouseDown 的觸發在selection改變之前
+            // 所以使用者所按下項目需由下面方法取得
             var item = ItemsControl.ContainerFromElement(projectListView,
                 e.OriginalSource as DependencyObject) as ListBoxItem;
             if (item != null)
             {
                 // get project data
                 ProjectData p = item.Content as ProjectData;
+                // 專門針對使用者對已選擇項目按下按鈕
                 if (p != null && p.Equals(projectListView.SelectedItem))
                 {
                     selectProject(p);
@@ -264,23 +278,21 @@ namespace Mirle_GPLC
             textBlock_projectAddr.Text = project.addr;
             textBox_searchTag.Text = "";
             // 清空 Tag table
-            //projectTagTable.Items.Clear();
+            TagTableClear();
             // 清空 Tag list
             tagList.Clear();
 
             // 讀取專案內的裝置
-            List<Device> devices = project.devices;
+            List<DeviceData> devices = project.devices;
 
-            // 加入所有裝置的點位到Tag List
-            foreach (Device device in devices)
+            // 加入所有裝置的點位到 taglist
+            foreach (DeviceData device in devices)
             {
                 tagList.AddRange(device.tags);
             }
             // 加入點位到Tag Table
-            /*foreach (Tag tag in tagList)
-            {
-                projectTagTable.Items.Add(tag);
-            }*/
+            TagTableAdd(tagList);
+            TagDataSource.Refresh();
             // 分類
             //var data = new ObservableCollection<Tag>(tagList);
             //_viewModel.DataSource = new ListCollectionView(data);
@@ -304,16 +316,56 @@ namespace Mirle_GPLC
         // 選擇專案
         public void selectProject(ProjectData project)
         {
-            // switch to map tab
+            // 切換至地圖瀏覽頁面
             tabControl1.SelectedItem = tabItem_map;
-            // switch seleted item
+            // 切換專案列表的已選取專案
             projectListView.SelectedItem = project;
-            // map center to project and zoom
+
+            // 將專案位置設為中心並調整zoom大小
             //gMap.Position = new PointLatLng(project.lat, project.lng);
             //gMap.Zoom = 8;
-            //gMap.ReloadMap();
+
+            /* 更換地圖類別時
+             * 有時會造成marker位置錯誤
+             * 調整Zoom可以使marker位置恢復正常
+             * */
+            gMap.Zoom++;
+            gMap.Zoom--;
             
             initProjectDataViewFlyout(project);
         }
+
+
+        #region -- Tab Table 新增、修改方法 --
+        private void TagTableAdd(List<TagData> tags)
+        {
+            //新增多個Tag至Tag Table
+            foreach (TagData tag in tags)
+            {
+                TagDataSource.AddNewItem(tag);
+            }
+            // 儲存 新增項目 並暫停 "新增執行階段"
+            TagDataSource.CommitNew();
+        }
+
+        private void TagTableAdd(TagData tag)
+        {
+            // 新增Tag至Tag Tabled
+            TagDataSource.AddNewItem(tag);
+            // 儲存 新增項目 並暫停 "新增執行階段"
+            TagDataSource.CommitNew();
+        }
+
+        // 清除Tag Table
+        private void TagTableClear()
+        {
+            // 不斷移除首項直到清空
+            while (TagDataSource.Count > 0)
+            {
+                TagDataSource.RemoveAt(0);
+            }
+        }
+
+        #endregion
     }
 }

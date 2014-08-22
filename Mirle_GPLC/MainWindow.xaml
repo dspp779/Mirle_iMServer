@@ -67,7 +67,7 @@
                     <TextBlock Name="textBlock_projectAddr" Margin="55,0,10,0" TextWrapping="Wrap" Text="projectAddress" VerticalAlignment="Top" FontSize="14" Height="19"/>
 
                     <DataGrid CanUserAddRows="False" AutoGenerateColumns="False"
-                              Name="projectTagTable" Margin="0,10" Grid.Row="1" ColumnWidth="*"
+                              Name="projectTagTable" Margin="10,10" Grid.Row="1" ColumnWidth="*"
                               HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" ItemsSource="{Binding DataSource}">
                         <DataGrid.GroupStyle>
                             <GroupStyle>
@@ -79,23 +79,19 @@
                                                     <Expander IsExpanded="True">
                                                         <Expander.Style>
                                                             <Style TargetType="{x:Type Expander}">
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding DeviceName}" Value="True">
-                                                                        <Setter Property="Background" Value="Blue"/>
-                                                                    </DataTrigger>
-                                                                    <DataTrigger Binding="{Binding DeviceName}" Value="False">
-                                                                        <Setter Property="Background" Value="Violet"/>
-                                                                        <Setter Property="FontStyle" Value="Italic"/>
-                                                                        <Setter Property="Foreground" Value="Gray"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
+                                                                <Setter Property="Background" Value="LightSteelBlue"/>
+                                                                <Setter Property="Foreground" Value="Black"/>
+                                                                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                                                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                                             </Style>
                                                         </Expander.Style>
                                                         <Expander.Header>
                                                             <StackPanel Orientation="Horizontal">
-                                                                <TextBlock Text="{Binding DeviceName}" Margin="5 2 5 2"/>
+                                                                <TextBlock Text="裝置" Margin="0 2 5 2"/>
+                                                                <TextBlock Text="{Binding Name}" Margin="5 2 5 2"/>
                                                                 <TextBlock Text=":" Margin="0 2 5 2"/>
                                                                 <TextBlock Text="{Binding ItemCount}" Margin="0 2 0 2"/>
+                                                                <TextBlock Text=" 點位" Margin="0 2 5 2"/>
                                                             </StackPanel>
                                                         </Expander.Header>
                                                         <ItemsPresenter />
@@ -106,19 +102,11 @@
                                     </Style>
                                 </GroupStyle.ContainerStyle>
                             </GroupStyle>
-                            <GroupStyle>
-                                <GroupStyle.HeaderTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" Background="LightSteelBlue">
-                                            <TextBlock Text="{Binding DeviceName}" Foreground="Black" Margin="5 2 5 2"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </GroupStyle.HeaderTemplate>
-                            </GroupStyle>
                         </DataGrid.GroupStyle>
                         <DataGrid.Columns>
+                            <DataGridTextColumn Header=" " IsReadOnly="True" Width="10"/>
                             <DataGridTextColumn Header="點位名稱" IsReadOnly="True" Binding="{Binding Path=LogName}"/>
-                            <DataGridTextColumn Header="監測值" IsReadOnly="True" Binding="{Binding Path=Value}" />
+                            <DataGridTextColumn Header="監測值" IsReadOnly="True" Binding="{Binding Path=Value}"/>
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -172,13 +160,16 @@
                             <ColumnDefinition Width="0" />
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
-                        <ComboBox Height="26" Name="comboBox_maptype" Width="120" SelectionChanged="comboBox_maptype_SelectionChanged" Margin="71,5,0,0" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Top">
-                            <ComboBoxItem Content="Google地圖" IsSelected="True" />
-                            <ComboBoxItem Content="Google地形地圖" />
-                            <ComboBoxItem Content="OpenStreet地圖" />
+                        <ComboBox Height="26" Name="comboBox_maptype" Width="150"
+                                  Margin="71,5,0,0" Grid.Column="1" Grid.Row="1"
+                                  HorizontalAlignment="Left" VerticalAlignment="Top"
+                                  ItemsSource="{Binding GMapProviderList}">
+                            <ComboBox.SelectedItem>
+                                <Binding Path="MapProvider" ElementName="gMap"/>
+                            </ComboBox.SelectedItem>
                         </ComboBox>
                         <Menu Margin="10,10,667,552" Grid.ColumnSpan="2" Grid.Row="2" Background="{DynamicResource Background}">
-                            <MenuItem Header="主題顏色" ItemsSource="{Binding AccentColors, Mode=OneWay}"
+                            <MenuItem ItemsSource="{Binding AccentColors, Mode=OneWay}"
                                       ItemContainerStyle="{StaticResource AccentColorMenuItemStyle}" />
                         </Menu>
                         <DockPanel Margin="0" Name="dockPanel1" Grid.ColumnSpan="2"/>
