@@ -14,9 +14,9 @@ namespace Mirle.iMServer.Model.Db
     public class MySqlDbInterface : DbInterface
     {
         // default db data source
-        private string server = "192.168.30.78";
-        private string userid = "test";
-        private string password = "1234567";
+        private string server = "localhost";
+        private string userid = "root";
+        private string password = " ";
         private string database = "mirle";
         private string charset = "utf8";
         private bool persistSecurityInfo = true;

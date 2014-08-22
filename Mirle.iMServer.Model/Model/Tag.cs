@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
 namespace Mirle.iMServer.Model
 {
-    public class TagData
+    public class TagData : INotifyPropertyChanged
     {
         public static TagData Empty = new TagData();
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         private long _id;
         private string _table;
@@ -108,14 +111,28 @@ namespace Mirle.iMServer.Model
             return _log_name;
         }
 
+
+
+        public void NotifyValueChanged()
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs("Value"));
+            }
+        }
+
         private float? getNumericVal()
         {
+            if (this.Equals(TagData.Empty))
+                return null;
             float? f = ModelUtil.getTagVal(this);
             return f != null ? f : null;
         }
 
         private string getTextVal()
         {
+            if (this.Equals(TagData.Empty))
+                return "null";
             float? f = ModelUtil.getTagVal(this);
             return f != null ? f.ToString() : "null";
         }

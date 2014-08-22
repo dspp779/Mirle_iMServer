@@ -183,16 +183,33 @@ namespace Mirle.iMServer.Model
                         foreach (DataRow row in schemaTable.Rows)
                         {
                             string columnName = row[schemaTable.Columns[0]].ToString();
+                            float? value = null;
                             try
                             {
-                                trendTable.Add(columnName, reader.GetFloat(columnName));
+                                value = reader.GetFloat(columnName);
                             }
                             catch (Exception) { };
+                            // add or update
+                            if (trendTable.ContainsKey(columnName))
+                            {
+                                trendTable[columnName] = value;
+                            }
+                            else
+                            {
+                                trendTable.Add(columnName, value);
+                            }
                         }
                     }
                 }
             }
         }
 
+        private static void refreshAllCacheVal()
+        {
+            foreach (KeyValuePair<string, Dictionary<string, float?>> table in trendTableManager)
+            {
+                refreshRowVal(table.Key, table.Value);
+            }
+        }
     }
 }

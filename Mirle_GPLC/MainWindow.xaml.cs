@@ -40,10 +40,10 @@ namespace Mirle_GPLC
             InitializeComponent();
 
             // 初始化Tag Table
-            tagList.Add(TagData.Empty);
-            var data = new ObservableCollection<TagData>(tagList);
-            TagDataSource = new ListCollectionView(data);
-            _viewModel.DataSource = TagDataSource;
+            //tagList.Add(TagData.Empty);
+            //var data = new ObservableCollection<TagData>(tagList);
+            //TagDataSource = new ListCollectionView(data);
+            //_viewModel.DataSource = TagDataSource;
 
             // add your custom map db provider
             //MySQLPureImageCache ch = new MySQLPureImageCache();
@@ -173,23 +173,6 @@ namespace Mirle_GPLC
         #endregion
 
         #region -- Event Handlers --
-
-        // 地圖選擇改變事件處理
-        private void comboBox_maptype_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            switch(comboBox_maptype.SelectedIndex)
-            {
-                case 0:
-                    gMap.MapProvider = GoogleMapProvider.Instance;
-                    break;
-                case 1:
-                    gMap.MapProvider = GoogleTerrainMapProvider.Instance;
-                    break;
-                case 2:
-                    gMap.MapProvider = OpenStreetMapProvider.Instance;
-                    break;
-            }
-        }
 
         // 搜尋Project文字方塊文字變更事件處理
         private void textBox_searchProject_TextChanged(object sender, TextChangedEventArgs e)
