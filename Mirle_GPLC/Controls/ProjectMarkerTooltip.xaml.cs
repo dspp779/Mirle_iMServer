@@ -16,7 +16,6 @@ namespace Mirle_GPLC.Controls
         public void SetValues(ProjectData project)
         {
             textblock_ProjectName.Text = project.name;
-            textBlock_ProjectAddress.Text = project.addr;
             textBlock_DeviceNum.Text = project.devices.Count.ToString();
             //TimeGps.Text = project.lat.ToString();
             //Area.Text = project.lng.ToString();

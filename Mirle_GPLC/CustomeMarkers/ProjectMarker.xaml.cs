@@ -25,13 +25,48 @@ namespace Mirle_GPLC.CustomeMarkers
     /// </summary>
     public partial class ProjectMarker
     {
-        string markerHollowPath = "pack://application:,,,/Mirle_GPLC;component/CustomeMarkers/ProjectMarkerHollow.png";
-        string markerFillPath = "pack://application:,,,/Mirle_GPLC;component/CustomeMarkers/ProjectMarkerFill.png";
+        // marker image uri
+        private static string markerHollowPath = "pack://application:,,,/Mirle_GPLC;component/CustomeMarkers/ProjectMarkerHollow.png";
+        private static string markerFillPath = "pack://application:,,,/Mirle_GPLC;component/CustomeMarkers/ProjectMarkerFill.png";
 
         Popup Popup;
         GMapMarker Marker;
         MainWindow mainWindow;
+        
         public ProjectData Project;
+        bool selected;
+
+        public string name
+        {
+            get { return Project.name; }
+        }
+        public double lat
+        {
+            get { return Project.lat; }
+        }
+        public double lng
+        {
+            get { return Project.lng; }
+        }
+        public bool IsSelected
+        {
+            get { return selected; }
+            set
+            {
+                selected = value;
+                if (value)
+                {
+                    Marker.ZIndex += 10000;
+                    icon.Source = new BitmapImage(new Uri(markerFillPath));
+                }
+                else
+                {
+                    Marker.ZIndex -= 10000;
+                    icon.Source = new BitmapImage(new Uri(markerHollowPath));
+                }
+            }
+        }
+        
 
         public ProjectMarker(MainWindow mainWindow , GMapMarker marker, ProjectData project)
         {
@@ -40,6 +75,7 @@ namespace Mirle_GPLC.CustomeMarkers
             this.mainWindow = mainWindow;
             this.Marker = marker;
             this.Project = project;
+            selected = false;
 
             initProjectMarker();
         }
@@ -69,13 +105,14 @@ namespace Mirle_GPLC.CustomeMarkers
 
         void ProjectMarker_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            mainWindow.selectProject(Project);
+            mainWindow.projectMarkerClicked(this);
         }
 
         void ProjectMarker_MouseLeave(object sender, MouseEventArgs e)
         {
-            icon.Source = new BitmapImage(new Uri(markerHollowPath));
-            Marker.ZIndex -= 10000;
+            if(!selected)
+                icon.Source = new BitmapImage(new Uri(markerHollowPath));
+            Marker.ZIndex -= 100000;
             Popup.IsOpen = false;
             Popup.Child = null;
         }
@@ -83,7 +120,7 @@ namespace Mirle_GPLC.CustomeMarkers
         void ProjectMarker_MouseEnter(object sender, MouseEventArgs e)
         {
             icon.Source = new BitmapImage(new Uri(markerFillPath));
-            Marker.ZIndex += 10000;
+            Marker.ZIndex += 100000;
             ProjectMarkerTooltip tooltip = new ProjectMarkerTooltip();
             tooltip.SetValues(Project);
             Popup.Child = tooltip;
@@ -109,32 +146,14 @@ namespace Mirle_GPLC.CustomeMarkers
          */
         private void ProjectMarker_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            GMapControl gMap = mainWindow.gMap;
-            // latlng position of the project
             PointLatLng projectPosition = new PointLatLng(Project.lat, Project.lng);
+            // hover position locking zoom
+            mainWindow.positionLockZoom(mainWindow.gMap, projectPosition, (e.Delta > 0) ? 1 : -1);
+        }
 
-            // local position of the project
-            GPoint mouseLastZoom = gMap.FromLatLngToLocal(projectPosition);
-
-            // center zoom to project
-            gMap.Position = projectPosition;
-            gMap.Zoom += (e.Delta > 0) ? 1 : -1;
-
-            int zoom = (int)gMap.Zoom;
-
-            // compute render offset
-            GPoint renderOffset = GPoint.Empty;
-            renderOffset.X = (int)gMap.RenderSize.Width/2 - mouseLastZoom.X;
-            renderOffset.Y = (int)gMap.RenderSize.Height/2 - mouseLastZoom.Y;
-
-            // current pixel position of the project
-            GPoint positionPixel = gMap.MapProvider.Projection.FromLatLngToPixel(projectPosition, zoom);
-
-            // new center position in pixel
-            positionPixel.Offset(renderOffset);
-
-            // compute and set the latlng of new center position
-            gMap.Position = gMap.MapProvider.Projection.FromPixelToLatLng(positionPixel, zoom);
+        public override string ToString()
+        {
+            return Project.ToString();
         }
     }
 }

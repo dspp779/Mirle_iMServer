@@ -13,6 +13,8 @@ using Mirle_GPLC.CustomeMarkers;
 using System;
 using System.Windows.Data;
 using System.Collections.ObjectModel;
+using System.Windows.Media;
+using System.Diagnostics;
 
 namespace Mirle_GPLC
 {
@@ -23,15 +25,35 @@ namespace Mirle_GPLC
     {
         private readonly MainWindowViewModel _viewModel;
 
-        // marker
-        //GMapMarker currentMarker;
-        //List<GMapMarker> deviceMarkers;
-
         // project data
         List<ProjectData> projectList;
+        Dictionary<ProjectData, ProjectMarker> projectMarkerDictionary
+            = new Dictionary<ProjectData, ProjectMarker>();
         List<TagData> tagList = new List<TagData>();
 
         ListCollectionView TagDataSource;
+
+        ProjectMarker _currentMarker;
+        protected ProjectMarker CurrentMarker
+        {
+            get { return _currentMarker; }
+            set
+            {
+                // 更新地圖先前選擇的 project marker 的狀態
+                if (_currentMarker != null)
+                {
+                    _currentMarker.IsSelected = false;
+                }
+
+                // 更新地圖新選擇的 project marker 的狀態
+                _currentMarker = value;
+                _currentMarker.IsSelected = true;
+
+                // 更新專案列表的 已選取專案
+                projectListView.SelectedItem =
+                    _currentMarker != null ? _currentMarker.Project : null;
+            }
+        }
 
         public MainWindow()
         {
@@ -40,10 +62,10 @@ namespace Mirle_GPLC
             InitializeComponent();
 
             // 初始化Tag Table
-            //tagList.Add(TagData.Empty);
-            //var data = new ObservableCollection<TagData>(tagList);
-            //TagDataSource = new ListCollectionView(data);
-            //_viewModel.DataSource = TagDataSource;
+            tagList.Add(TagData.Empty);
+            var data = new ObservableCollection<TagData>(tagList);
+            TagDataSource = new ListCollectionView(data);
+            _viewModel.DataSource = TagDataSource;
 
             // add your custom map db provider
             //MySQLPureImageCache ch = new MySQLPureImageCache();
@@ -69,6 +91,8 @@ namespace Mirle_GPLC
             // 設定初始位置
             gMap.Position = new PointLatLng(23.8, 121);
 
+            // 初始化當前標記為空值
+            _currentMarker = null;
 
             // 初始化地圖選擇方塊
             comboBox_maptype.SelectedItem = gMap.MapProvider;
@@ -83,6 +107,12 @@ namespace Mirle_GPLC
             {
                 messageDialog("發生錯誤", "載入專案資料時發生錯誤\n"+ex.Message);
             }
+
+            // 印出參數
+            //string str = "";
+            //foreach (string s in Environment.GetCommandLineArgs())
+            //    str += s+"\n";
+            //messageDialog("參數：", str);
         }
 
         private void refreshProjectData(List<ProjectData> pList)
@@ -91,67 +121,58 @@ namespace Mirle_GPLC
             // 清空專案列表
             projectListView.Items.Clear();
             gMap.Markers.Clear();
+            // 反序地加入專案地圖標記，使得排序較前的專案有較高的z-index
+            for (int i = pList.Count - 1; i >= 0; i--)
+            {
+                GMapMarker pm = newProjectMarker(pList[i]);
+            }
             // 加入專案列表
             foreach (ProjectData p in pList)
             {
-                GMapMarker pm = newProjectMarker(p);
                 projectListView.Items.Add(p);
             }
         }
 
-        private void searchProject(string keywordCommand)
+        #region -- Tab Table 新增、修改方法 --
+        private void TagTableAdd(List<TagData> tags)
         {
-            string[] keywordList = parseKeyword(keywordCommand);
-
-            foreach (ProjectData p in projectList)
+            //新增多個Tag至Tag Table
+            foreach (TagData tag in tags)
             {
-                // removal phase
-                if (projectListView.Items.Contains(p))
-                {
-                    if(!p.containsKeyword(keywordList))
-                        projectListView.Items.Remove(p);
-                }
-                // add back phase
-                else
-                {
-                    if(p.containsKeyword(keywordList))
-                        projectListView.Items.Add(p);
-                }
+                TagDataSource.AddNewItem(tag);
+            }
+            // 儲存 新增項目 並暫停 "新增執行階段"
+            TagDataSource.CommitNew();
+        }
+
+        private void TagTableAdd(TagData tag)
+        {
+            // 新增Tag至Tag Tabled
+            TagDataSource.AddNewItem(tag);
+            // 儲存 新增項目 並暫停 "新增執行階段"
+            TagDataSource.CommitNew();
+        }
+
+        // 清除Tag Table
+        private void TagTableClear()
+        {
+            // 不斷移除首項直到清空
+            while (TagDataSource.Count > 0)
+            {
+                TagDataSource.RemoveAt(0);
+            }
+            // scroll to top
+            var border = VisualTreeHelper.GetChild(projectTagTable, 0) as Decorator;
+            if (border != null)
+            {
+                var scrollViewer = border.Child as ScrollViewer;
+                scrollViewer.ScrollToTop();
             }
         }
 
-        private void searchTag(string keywordCommand)
-        {
-            string[] keywordList = parseKeyword(keywordCommand);
+        #endregion
 
-            foreach (TagData t in tagList)
-            {
-                // removal phase
-                if (TagDataSource.Contains(t))
-                {
-                    if (!t.containsKeyword(keywordList))
-                        TagDataSource.Remove(t);
-                }
-                // add back phase
-                else
-                {
-                    if (t.containsKeyword(keywordList))
-                        TagTableAdd(t);
-                }
-            }
-        }
-
-        private string[] parseKeyword(string keyword)
-        {
-            string Bopomofo = "[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˊˇˋ˙]+";
-            Regex reg = new Regex(Bopomofo);
-            keyword = reg.Replace(keyword, "");
-            reg = new Regex("\\s+");
-            keyword = reg.Replace(keyword.Trim(), " ");
-            return keyword.Split(' ');
-        }
-
-        #region -- marker functions --
+        #region -- marker adding functions --
         private GMapMarker newProjectMarker(ProjectData p)
         {
             return newProjectMarker(new PointLatLng(p.lat, p.lng), p);
@@ -159,8 +180,13 @@ namespace Mirle_GPLC
         private GMapMarker newProjectMarker(PointLatLng latlng, ProjectData p)
         {
             GMapMarker marker = new GMapMarker(latlng);
-            marker.Shape = new ProjectMarker(this, marker, p);
+            ProjectMarker pm = new ProjectMarker(this, marker, p);
+            // 設定 marker 為 project marker 的形狀
+            marker.Shape = pm;
+            // 將 marker 加入地圖中
             addMarker(marker);
+            // 加入 project marker list 中
+            projectMarkerDictionary.Add(p, pm);
             return marker;
         }
         // add marker to overlay delegate
@@ -213,11 +239,8 @@ namespace Mirle_GPLC
         // 專案選項變更事件處理
         private void projectListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ProjectData p = projectListView.SelectedItem as ProjectData;
-            if (p != null)
-            {
-                selectProject(p);
-            }
+            //ProjectData p = projectListView.SelectedItem as ProjectData;
+            //if (p != null)
         }
 
         /* selection change does not trigger when mouse down on the selected item
@@ -227,6 +250,7 @@ namespace Mirle_GPLC
          * mouseDown 則不會在項目被按下時觸發
          * 所以使用previewMouseDown
          * 專門針對使用者對已選擇項目按下按鈕，開啟專案資料瀏覽
+         * 同時，專案項目點擊，會造成地圖位置改變，而非專案項目選擇改變
          * */
         private void projectListView_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -239,19 +263,54 @@ namespace Mirle_GPLC
             {
                 // get project data
                 ProjectData p = item.Content as ProjectData;
-                // 專門針對使用者對已選擇項目按下按鈕
-                if (p != null && p.Equals(projectListView.SelectedItem))
+
+                if (p != null)
                 {
                     selectProject(p);
                 }
             }
             else
             {
-                projectListView.UnselectAll();
+                projectListView.SelectedItem = null;
+                CurrentMarker = null;
+                //projectListView.UnselectAll();
             }
         }
 
         #endregion
+
+        // 地圖上專案標記的點擊事件處理 : 由project marker 呼叫
+        public void projectMarkerClicked(ProjectMarker pm)
+        {
+            // project marker 不能為 null
+            Debug.Assert(pm != null);
+
+            CurrentMarker = pm;
+            // 開啟project flyout
+            initProjectDataViewFlyout(pm.Project);
+        }
+
+        // 選擇專案
+        private void selectProject(ProjectData project)
+        {
+            // project 不能為 null
+            Debug.Assert(project != null);
+
+            // 更新專案列表的已選取專案
+            projectListView.SelectedItem = project;
+
+            // 更新地圖的當前 project marker
+            ProjectMarker pm = null;
+            projectMarkerDictionary.TryGetValue(project, out pm);
+            CurrentMarker = pm;
+
+            // 將專案位置設為中心並調整zoom大小
+            gMap.Position = new PointLatLng(project.lat, project.lng);
+            gMap.Zoom = 17;
+
+            // 開啟project flyout
+            initProjectDataViewFlyout(project);
+        }
 
         // 開啟專案內容瀏覽畫面
         private void initProjectDataViewFlyout(ProjectData project)
@@ -276,11 +335,46 @@ namespace Mirle_GPLC
             // 加入點位到Tag Table
             TagTableAdd(tagList);
             TagDataSource.Refresh();
-            // 分類
-            //var data = new ObservableCollection<Tag>(tagList);
-            //_viewModel.DataSource = new ListCollectionView(data);
             // 開啟Flyout
             projectFlyout.IsOpen = true;
+        }
+
+        /* 位置鎖定縮放
+         * 
+         * 作法為
+         * 先記錄鎖定點在畫面的位置 (mouseLastZoom)
+         * 以鎖定點做為中心進行縮放 (Zoom+-)
+         * 
+         * 算出先前已記錄畫面位置的點與畫面中心的像素差 (renderOffset)
+         * 此像素差即為整張地圖所需的位移量
+         * 
+         * 算出新的中心點像素位置：鎖定點像素位置+位移量
+         * 算出中心點經緯座標：FromPixelToLatLng
+         */
+        public void positionLockZoom(GMapControl mapControl, PointLatLng lockPosition, int delta)
+        {
+            // local position of lock position
+            GPoint mouseLastZoom = mapControl.FromLatLngToLocal(lockPosition);
+
+            // center zoom to project
+            mapControl.Position = lockPosition;
+            mapControl.Zoom += (delta > 0) ? 1 : -1;
+
+            int zoom = (int)mapControl.Zoom;
+
+            // compute render offset
+            GPoint renderOffset = GPoint.Empty;
+            renderOffset.X = (int)mapControl.RenderSize.Width / 2 - mouseLastZoom.X;
+            renderOffset.Y = (int)mapControl.RenderSize.Height / 2 - mouseLastZoom.Y;
+
+            // current pixel position of the project
+            GPoint positionPixel = mapControl.MapProvider.Projection.FromLatLngToPixel(lockPosition, zoom);
+
+            // new center position in pixel
+            positionPixel.Offset(renderOffset);
+
+            // compute and set the latlng of new center position
+            mapControl.Position = mapControl.MapProvider.Projection.FromPixelToLatLng(positionPixel, zoom);
         }
 
         // 非同步對話方塊
@@ -296,59 +390,57 @@ namespace Mirle_GPLC
             await this.ShowMessageAsync(title, message, MessageDialogStyle.Affirmative, mySettings);
         }
 
-        // 選擇專案
-        public void selectProject(ProjectData project)
+        private void searchProject(string keywordCommand)
         {
-            // 切換至地圖瀏覽頁面
-            tabControl1.SelectedItem = tabItem_map;
-            // 切換專案列表的已選取專案
-            projectListView.SelectedItem = project;
+            string[] keywordList = parseKeyword(keywordCommand);
 
-            // 將專案位置設為中心並調整zoom大小
-            //gMap.Position = new PointLatLng(project.lat, project.lng);
-            //gMap.Zoom = 8;
-
-            /* 更換地圖類別時
-             * 有時會造成marker位置錯誤
-             * 調整Zoom可以使marker位置恢復正常
-             * */
-            gMap.Zoom++;
-            gMap.Zoom--;
-            
-            initProjectDataViewFlyout(project);
-        }
-
-
-        #region -- Tab Table 新增、修改方法 --
-        private void TagTableAdd(List<TagData> tags)
-        {
-            //新增多個Tag至Tag Table
-            foreach (TagData tag in tags)
+            foreach (ProjectData p in projectList)
             {
-                TagDataSource.AddNewItem(tag);
-            }
-            // 儲存 新增項目 並暫停 "新增執行階段"
-            TagDataSource.CommitNew();
-        }
-
-        private void TagTableAdd(TagData tag)
-        {
-            // 新增Tag至Tag Tabled
-            TagDataSource.AddNewItem(tag);
-            // 儲存 新增項目 並暫停 "新增執行階段"
-            TagDataSource.CommitNew();
-        }
-
-        // 清除Tag Table
-        private void TagTableClear()
-        {
-            // 不斷移除首項直到清空
-            while (TagDataSource.Count > 0)
-            {
-                TagDataSource.RemoveAt(0);
+                // removal phase
+                if (projectListView.Items.Contains(p))
+                {
+                    if (!p.containsKeyword(keywordList))
+                        projectListView.Items.Remove(p);
+                }
+                // add back phase
+                else
+                {
+                    if (p.containsKeyword(keywordList))
+                        projectListView.Items.Add(p);
+                }
             }
         }
 
-        #endregion
+        private void searchTag(string keywordCommand)
+        {
+            string[] keywordList = parseKeyword(keywordCommand);
+
+            foreach (TagData t in tagList)
+            {
+                // removal phase
+                if (TagDataSource.Contains(t))
+                {
+                    if (!t.containsKeyword(keywordList))
+                        TagDataSource.Remove(t);
+                }
+                // add back phase
+                else
+                {
+                    if (t.containsKeyword(keywordList))
+                        TagTableAdd(t);
+                }
+            }
+        }
+
+        private string[] parseKeyword(string keyword)
+        {
+            string Bopomofo = "[ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦˊˇˋ˙]+";
+            Regex reg = new Regex(Bopomofo);
+            keyword = reg.Replace(keyword, "");
+            reg = new Regex("\\s+");
+            keyword = reg.Replace(keyword.Trim(), " ");
+            return keyword.Split(' ');
+        }
+
     }
 }

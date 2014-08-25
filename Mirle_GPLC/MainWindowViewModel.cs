@@ -69,8 +69,6 @@ namespace Mirle_GPLC
                                             .Select(a => new AccentColorMenuData()
                                             { Name = a.Name, ColorBrush = a.Resources["AccentColorBrush"] as Brush })
                                             .ToList();
-
-            BrushResources = FindBrushResources();
         }
 
         public string Title { get; set; }
@@ -91,24 +89,6 @@ namespace Mirle_GPLC
             }
         }
         
-        public IEnumerable<string> BrushResources { get; private set; }
-
-        private IEnumerable<string> FindBrushResources()
-        {
-            var rd = new ResourceDictionary
-            {
-                Source = new Uri(@"/MahApps.Metro;component/Styles/Colors.xaml", UriKind.RelativeOrAbsolute)
-            };
-
-            var resources = rd.Keys.Cast<object>()
-                    .Where(key => rd[key] is Brush)
-                    .Select(key => key.ToString())
-                    .OrderBy(s => s)
-                    .ToList();
-
-            return resources;
-        }
-
         public string this[string columnName]
         {
             get

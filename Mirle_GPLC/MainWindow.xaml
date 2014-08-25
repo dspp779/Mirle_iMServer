@@ -16,7 +16,7 @@
     GlowBrush="{DynamicResource AccentColorBrush}"
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance Mirle_GPLC:MainWindowViewModel}"
-    Loaded="Window_Loaded" Closing="MetroWindow_Closing" Background="{DynamicResource Background}">
+    Loaded="Window_Loaded" Closing="MetroWindow_Closing" Background="{DynamicResource Background}" ShowWindowCommandsOnTop="False">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -54,8 +54,7 @@
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
             <Controls:Flyout Name="projectFlyout" Header="ProjectView" Position="Right"
-                             IsModal="True" MinWidth="600" Width="600" Theme="Accent"
-                             Foreground="{DynamicResource IdealForegroundColorBrush}">
+                             IsModal="False" MinWidth="300" Width="300" Theme="Adapt">
 
                 <Grid Margin="10,-15,10,10">
                     <Grid.RowDefinitions>
@@ -67,8 +66,10 @@
                     <TextBlock Name="textBlock_projectAddr" Margin="55,0,10,0" TextWrapping="Wrap" Text="projectAddress" VerticalAlignment="Top" FontSize="14" Height="19"/>
 
                     <DataGrid CanUserAddRows="False" AutoGenerateColumns="False"
+                              BorderBrush="Black" BorderThickness="1"
                               Name="projectTagTable" Margin="10,10" Grid.Row="1" ColumnWidth="*"
-                              HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" ItemsSource="{Binding DataSource}">
+                              HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                              ItemsSource="{Binding DataSource}" HorizontalScrollBarVisibility="Hidden">
                         <DataGrid.GroupStyle>
                             <GroupStyle>
                                 <GroupStyle.ContainerStyle>
@@ -81,12 +82,10 @@
                                                             <Style TargetType="{x:Type Expander}">
                                                                 <Setter Property="Background" Value="LightSteelBlue"/>
                                                                 <Setter Property="Foreground" Value="Black"/>
-                                                                <Setter Property="HorizontalAlignment" Value="Stretch" />
-                                                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                                             </Style>
                                                         </Expander.Style>
                                                         <Expander.Header>
-                                                            <StackPanel Orientation="Horizontal">
+                                                            <StackPanel Orientation="Horizontal" Margin="0">
                                                                 <TextBlock Text="裝置" Margin="0 2 5 2"/>
                                                                 <TextBlock Text="{Binding Name}" Margin="5 2 5 2"/>
                                                                 <TextBlock Text=":" Margin="0 2 5 2"/>
@@ -105,8 +104,9 @@
                         </DataGrid.GroupStyle>
                         <DataGrid.Columns>
                             <DataGridTextColumn Header=" " IsReadOnly="True" Width="10"/>
-                            <DataGridTextColumn Header="點位名稱" IsReadOnly="True" Binding="{Binding Path=LogName}"/>
-                            <DataGridTextColumn Header="監測值" IsReadOnly="True" Binding="{Binding Path=Value}"/>
+                            <DataGridTextColumn Header="點位名稱" IsReadOnly="True" Binding="{Binding Path=LogName}" Width="100"/>
+                            <DataGridTextColumn Header="監測值" IsReadOnly="True" Binding="{Binding Path=Value}" Width="100"/>
+                            <DataGridTextColumn IsReadOnly="True"/>
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -168,9 +168,9 @@
                                 <Binding Path="MapProvider" ElementName="gMap"/>
                             </ComboBox.SelectedItem>
                         </ComboBox>
-                        <Menu Margin="10,10,667,552" Grid.ColumnSpan="2" Grid.Row="2" Background="{DynamicResource Background}">
-                            <MenuItem ItemsSource="{Binding AccentColors, Mode=OneWay}"
-                                      ItemContainerStyle="{StaticResource AccentColorMenuItemStyle}" />
+                        <Menu Margin="240,5,452,19" Grid.ColumnSpan="2" Grid.Row="1" Background="{DynamicResource Background}">
+                            <MenuItem Header="主題顏色" ItemsSource="{Binding AccentColors, Mode=OneWay}"
+                        		ItemContainerStyle="{StaticResource AccentColorMenuItemStyle}" Height="26" />
                         </Menu>
                         <DockPanel Margin="0" Name="dockPanel1" Grid.ColumnSpan="2"/>
                         <TextBlock x:Name="textBlock_maptype" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="1" TextWrapping="Wrap" Text="地圖類型" VerticalAlignment="Top"/>

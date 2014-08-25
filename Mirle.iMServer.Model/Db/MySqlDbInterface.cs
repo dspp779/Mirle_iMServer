@@ -14,33 +14,13 @@ namespace Mirle.iMServer.Model.Db
     public class MySqlDbInterface : DbInterface
     {
         // default db data source
-        private string server = "localhost";
-        private string userid = "root";
-        private string password = " ";
-        private string database = "mirle";
-        private string charset = "utf8";
-        private bool persistSecurityInfo = true;
+        public static string server = "localhost";
+        public static string userid = "root";
+        public static string password = " ";
+        public static string database = "mirle";
+        public static string charset = "utf8";
+        public static bool persistSecurityInfo = true;
 
-        public string Server
-        {
-            get { return server; }
-            set { server = value; }
-        }
-        public string User
-        {
-            get { return userid; }
-            set { userid = value; }
-        }
-        public string Password
-        {
-            get { return password; }
-            set { password = value; }
-        }
-        public string Database
-        {
-            get { return database; }
-            set { database = value; }
-        }
         public string DataSource
         {
             get

@@ -85,6 +85,19 @@ namespace Mirle.iMServer.Model
         #endregion
 
         #region -- get device list --
+        public static List<DeviceData> getDeviceList()
+        {
+            List<DeviceData> dList = new List<DeviceData>();
+            MySqlDbInterface db = new MySqlDbInterface();
+            using (DbConnection conn = db.getConnection())
+            {
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand("SELECT DISTINCT(device) FROM loginfo");
+                cmd.Connection = conn as MySqlConnection;
+                getDeviceList(cmd, ProjectData.Empty, dList);
+            }
+            return dList;
+        }
         public static List<DeviceData> getDeviceList(ProjectData project)
         {
             List<DeviceData> dList = new List<DeviceData>();
@@ -92,8 +105,8 @@ namespace Mirle.iMServer.Model
             using (DbConnection conn = db.getConnection())
             {
                 conn.Open();
-                MySqlCommand cmd = new MySqlCommand("SELECT * FROM ProjectDevice WHERE project_id = @project_id");
-                cmd.Parameters.AddWithValue("@project_id", project.id);
+                MySqlCommand cmd = new MySqlCommand("SELECT * FROM ProjectDevice WHERE log_name = @log_name");
+                cmd.Parameters.AddWithValue("@log_name", project.alias);
                 cmd.Connection = conn as MySqlConnection;
                 getDeviceList(cmd, project, dList);
             }
