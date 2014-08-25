@@ -4,32 +4,77 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
-             mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
-
+             xmlns:Mirle_GPLC="clr-namespace:Mirle_GPLC"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Mirle_GPLC:MainWindowViewModel}"
+             d:DesignHeight="300" d:DesignWidth="300" Background="{DynamicResource AccentColorBrush}" MouseMove="UserControl_MouseMove" MouseLeftButtonDown="UserControl_MouseLeftButtonDown" MouseLeftButtonUp="UserControl_MouseLeftButtonUp">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/resources/Icons.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/Mirle_GPLC;component/Resources/Icons.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Margin="10">
+    <Grid Margin="10,10,10,10">
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="35"/>
             <RowDefinition/>
             <RowDefinition Height="45"/>
         </Grid.RowDefinitions>
-        <DataGrid Margin="0,10" Grid.Row="1">
+
+        <TextBlock Name="textBlock_projectName" Margin="10,6,0,0" TextWrapping="Wrap" Text="textBlock_projectName" VerticalAlignment="Top" FontSize="16" Height="19" HorizontalAlignment="Left"/>
+
+        <DataGrid CanUserAddRows="False" AutoGenerateColumns="False"
+                  BorderBrush="Black" BorderThickness="1"
+                  Name="projectTagTable" Margin="10,10" Grid.Row="1" ColumnWidth="*"
+                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                  ItemsSource="{Binding DataSource}" HorizontalScrollBarVisibility="Hidden">
+            <DataGrid.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="{x:Type GroupItem}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                                        <Expander IsExpanded="True">
+                                            <Expander.Style>
+                                                <Style TargetType="{x:Type Expander}">
+                                                    <Setter Property="Background" Value="LightSteelBlue"/>
+                                                    <Setter Property="Foreground" Value="Black"/>
+                                                </Style>
+                                            </Expander.Style>
+                                            <Expander.Header>
+                                                <StackPanel Orientation="Horizontal" Margin="0">
+                                                    <TextBlock Text="裝置" Margin="0 2 5 2"/>
+                                                    <TextBlock Text="{Binding Name}" Margin="5 2 5 2"/>
+                                                    <TextBlock Text=":" Margin="0 2 5 2"/>
+                                                    <TextBlock Text="{Binding ItemCount}" Margin="0 2 0 2"/>
+                                                    <TextBlock Text=" 點位" Margin="0 2 5 2"/>
+                                                </StackPanel>
+                                            </Expander.Header>
+                                            <ItemsPresenter />
+                                        </Expander>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
+                </GroupStyle>
+            </DataGrid.GroupStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn/>
+                <DataGridTextColumn Header=" " IsReadOnly="True" Width="10"/>
+                <DataGridTextColumn Header="點位名稱" IsReadOnly="True" Binding="{Binding Path=LogName}" Width="100"/>
+                <DataGridTextColumn Header="監測值" IsReadOnly="True" Binding="{Binding Path=Value}" Width="100"/>
+                <DataGridTextColumn IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
 
         <TextBox Name="textBox_searchTag" Controls:TextboxHelper.Watermark="搜尋點位..."
-                         Controls:TextboxHelper.ClearTextButton="True"
-                         Controls:TextboxHelper.ButtonCommand="{Binding TextBoxButtonCmd, Mode=OneWay}" Margin="10,0,0,10" Width="200" HorizontalAlignment="Left" Height="26" VerticalAlignment="Bottom" Grid.Row="2">
+                 Controls:TextboxHelper.ClearTextButton="True"
+                 Controls:TextboxHelper.ButtonCommand="{Binding TextBoxButtonCmd, Mode=OneWay}"
+                 Margin="10,0,10,10" Height="26" VerticalAlignment="Bottom"
+                 Grid.Row="2" TextChanged="textBox_searchTag_TextChanged">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}"
                                BasedOn="{StaticResource SearchMetroTextBox}">
@@ -43,6 +88,28 @@
                 </Style>
             </TextBox.Style>
         </TextBox>
-        <TextBlock Name="textBlock_projectAddr" Margin="10,10,10,0" TextWrapping="Wrap" Text="projectAddress" VerticalAlignment="Top" FontSize="14" Height="19"/>
+
+        <Button x:Name="button_expand" Width="32" Height="32" Margin="0,0,37,0"
+                HorizontalAlignment="Right" VerticalAlignment="Top"
+                Background="White" Style="{DynamicResource MetroCircleButtonStyle}" Click="button_expand_Click">
+            <Rectangle Width="12"
+                           Height="12"
+                           Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                <Rectangle.OpacityMask>
+                    <VisualBrush Stretch="Fill"
+                                     Visual="{DynamicResource appbar_window_maximize}" />
+                </Rectangle.OpacityMask>
+            </Rectangle>
+        </Button>
+        <Button x:Name="button_close" Width="32" Height="32"
+                Style="{DynamicResource MetroCircleButtonStyle}" Click="button_close_Click"
+                Background="White" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <Rectangle Width="12" Height="12"
+                       Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+                <Rectangle.OpacityMask>
+                    <VisualBrush Stretch="Fill" Visual="{DynamicResource appbar_close}" />
+                </Rectangle.OpacityMask>
+            </Rectangle>
+        </Button>
     </Grid>
 </UserControl>

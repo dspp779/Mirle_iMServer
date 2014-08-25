@@ -45,13 +45,20 @@ namespace Mirle_GPLC
                     _currentMarker.IsSelected = false;
                 }
 
-                // 更新地圖新選擇的 project marker 的狀態
+                // 更新地圖的目前 marker
                 _currentMarker = value;
-                _currentMarker.IsSelected = true;
 
-                // 更新專案列表的 已選取專案
-                projectListView.SelectedItem =
-                    _currentMarker != null ? _currentMarker.Project : null;
+                if (_currentMarker != null)
+                {
+                    // 更新地圖新選擇的 project marker 的狀態
+                    _currentMarker.IsSelected = true;
+                    // 更新專案列表的 已選取專案
+                    projectListView.SelectedItem = _currentMarker.Project;
+                }
+                else
+                {
+                    projectListView.SelectedItem = null;
+                }
             }
         }
 
@@ -66,6 +73,9 @@ namespace Mirle_GPLC
             var data = new ObservableCollection<TagData>(tagList);
             TagDataSource = new ListCollectionView(data);
             _viewModel.DataSource = TagDataSource;
+
+            // 初始化 project simple view
+            projectSimpleView.init(this);
 
             // add your custom map db provider
             //MySQLPureImageCache ch = new MySQLPureImageCache();
@@ -91,8 +101,11 @@ namespace Mirle_GPLC
             // 設定初始位置
             gMap.Position = new PointLatLng(23.8, 121);
 
-            // 初始化當前標記為空值
+            // 初始化目前標記為空值
             _currentMarker = null;
+
+            // 初始化 simple view 為隱藏
+            projectSimpleView.Visibility = Visibility.Hidden;
 
             // 初始化地圖選擇方塊
             comboBox_maptype.SelectedItem = gMap.MapProvider;
@@ -160,13 +173,6 @@ namespace Mirle_GPLC
             while (TagDataSource.Count > 0)
             {
                 TagDataSource.RemoveAt(0);
-            }
-            // scroll to top
-            var border = VisualTreeHelper.GetChild(projectTagTable, 0) as Decorator;
-            if (border != null)
-            {
-                var scrollViewer = border.Child as ScrollViewer;
-                scrollViewer.ScrollToTop();
             }
         }
 
@@ -286,8 +292,9 @@ namespace Mirle_GPLC
             Debug.Assert(pm != null);
 
             CurrentMarker = pm;
+            initProjectSimpleView(pm.Project);
             // 開啟project flyout
-            initProjectDataViewFlyout(pm.Project);
+            //initProjectDataViewFlyout(pm.Project);
         }
 
         // 選擇專案
@@ -299,26 +306,57 @@ namespace Mirle_GPLC
             // 更新專案列表的已選取專案
             projectListView.SelectedItem = project;
 
-            // 更新地圖的當前 project marker
+            // 更新地圖的目前 project marker
             ProjectMarker pm = null;
             projectMarkerDictionary.TryGetValue(project, out pm);
             CurrentMarker = pm;
 
             // 將專案位置設為中心並調整zoom大小
             gMap.Position = new PointLatLng(project.lat, project.lng);
-            gMap.Zoom = 17;
+            gMap.Zoom = 16;
 
-            // 開啟project flyout
-            initProjectDataViewFlyout(project);
+            initProjectSimpleView(project);
         }
 
-        // 開啟專案內容瀏覽畫面
-        private void initProjectDataViewFlyout(ProjectData project)
+        private void initProjectSimpleView(ProjectData project)
         {
+            // 關閉flyout
+            projectFlyout.IsOpen = false;
+
+            projectSimpleView.set(project);
+
+            // 更新專案 Tag Table 內容
+            initProjectTagTable(project);
+
+            // 重置 Tag Table scroll 為頂端
+            dataGridScrollToTop(projectSimpleView.projectTagTable);
+            //開啟 simple view
+            projectSimpleView.Visibility = Visibility.Visible;
+        }
+
+        // 開啟專案內容瀏覽 flyout
+        public void initProjectDataViewFlyout(ProjectData project)
+        {
+            // 隱藏 simple view
+            projectSimpleView.Visibility = Visibility.Hidden;
+
             // 初始化專案內容瀏覽畫面
             projectFlyout.Header = project.name;
             textBlock_projectAddr.Text = project.addr;
             textBox_searchTag.Text = "";
+
+            // 更新專案 Tag Table 內容
+            initProjectTagTable(project);
+
+            // 重置 Tag Table scroll 為頂端
+            dataGridScrollToTop(projectTagTable);
+            // 開啟Flyout
+            projectFlyout.IsOpen = true;
+        }
+
+        // 更新專案 Tag Table 內容
+        private void initProjectTagTable(ProjectData project)
+        {
             // 清空 Tag table
             TagTableClear();
             // 清空 Tag list
@@ -335,8 +373,6 @@ namespace Mirle_GPLC
             // 加入點位到Tag Table
             TagTableAdd(tagList);
             TagDataSource.Refresh();
-            // 開啟Flyout
-            projectFlyout.IsOpen = true;
         }
 
         /* 位置鎖定縮放
@@ -390,7 +426,7 @@ namespace Mirle_GPLC
             await this.ShowMessageAsync(title, message, MessageDialogStyle.Affirmative, mySettings);
         }
 
-        private void searchProject(string keywordCommand)
+        public void searchProject(string keywordCommand)
         {
             string[] keywordList = parseKeyword(keywordCommand);
 
@@ -411,7 +447,7 @@ namespace Mirle_GPLC
             }
         }
 
-        private void searchTag(string keywordCommand)
+        public void searchTag(string keywordCommand)
         {
             string[] keywordList = parseKeyword(keywordCommand);
 
@@ -440,6 +476,17 @@ namespace Mirle_GPLC
             reg = new Regex("\\s+");
             keyword = reg.Replace(keyword.Trim(), " ");
             return keyword.Split(' ');
+        }
+
+        private void dataGridScrollToTop(DataGrid control)
+        {
+            // scroll to top
+            var border = VisualTreeHelper.GetChild(control, 0) as Decorator;
+            if (border != null)
+            {
+                var scrollViewer = border.Child as ScrollViewer;
+                scrollViewer.ScrollToTop();
+            }
         }
 
     }

@@ -155,5 +155,12 @@ namespace Mirle_GPLC.CustomeMarkers
         {
             return Project.ToString();
         }
+
+        private void ProjectMarker_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            PointLatLng projectPosition = new PointLatLng(Project.lat, Project.lng);
+            // hover position locking zoom
+            mainWindow.positionLockZoom(mainWindow.gMap, projectPosition, 1);
+        }
     }
 }
