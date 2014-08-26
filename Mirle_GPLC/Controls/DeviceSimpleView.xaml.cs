@@ -18,17 +18,17 @@ namespace Mirle_GPLC.Controls
     /// <summary>
     /// ProjectView.xaml 的互動邏輯
     /// </summary>
-    public partial class ProjectView : UserControl
+    public partial class DeviceSimpleView : UserControl
     {
 
         private MainWindow mainWindow;
-        private ProjectData project;
+        private DeviceData project;
 
         private bool isDragging;
         private Point clickPosition;
         private TranslateTransform renderTransform = new TranslateTransform();
 
-        public ProjectView()
+        public DeviceSimpleView()
         {
             InitializeComponent();
         }
@@ -39,10 +39,10 @@ namespace Mirle_GPLC.Controls
             this.projectTagTable.LostMouseCapture += (sender, e) => { this.isDragging = false; };
         }
 
-        public void set(ProjectData p)
+        public void set(DeviceData p)
         {
             this.project = p;
-            textBlock_projectName.Text = project.name;
+            textBlock_projectName.Text = project.alias;
         }
 
         private void textBox_searchTag_TextChanged(object sender, TextChangedEventArgs e)
@@ -92,7 +92,13 @@ namespace Mirle_GPLC.Controls
             isDragging = false;
             var draggableControl = sender as UserControl;
             draggableControl.ReleaseMouseCapture();
+
             var tranform = draggableControl.RenderTransform as TranslateTransform;
+            if (tranform == null)
+            {
+                tranform = new TranslateTransform();
+                draggableControl.RenderTransform = tranform;
+            }
             renderTransform.X = tranform.X;
             renderTransform.Y = tranform.Y;
         }

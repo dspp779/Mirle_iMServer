@@ -23,12 +23,13 @@ namespace Mirle_GPLC
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        public static MainWindow runningInstance;
         private readonly MainWindowViewModel _viewModel;
 
         // project data
-        List<ProjectData> projectList;
-        Dictionary<ProjectData, ProjectMarker> projectMarkerDictionary
-            = new Dictionary<ProjectData, ProjectMarker>();
+        List<DeviceData> projectList;
+        Dictionary<DeviceData, ProjectMarker> projectMarkerDictionary
+            = new Dictionary<DeviceData, ProjectMarker>();
         List<TagData> tagList = new List<TagData>();
 
         ListCollectionView TagDataSource;
@@ -45,11 +46,10 @@ namespace Mirle_GPLC
                     _currentMarker.IsSelected = false;
                 }
 
-                // 更新地圖的目前 marker
-                _currentMarker = value;
-
-                if (_currentMarker != null)
+                if (value != null)
                 {
+                    // 更新地圖的目前 marker
+                    _currentMarker = value;
                     // 更新地圖新選擇的 project marker 的狀態
                     _currentMarker.IsSelected = true;
                     // 更新專案列表的 已選取專案
@@ -64,34 +64,37 @@ namespace Mirle_GPLC
 
         public MainWindow()
         {
+            // 設定 DataContext
             _viewModel = new MainWindowViewModel();
             DataContext = _viewModel;
+
             InitializeComponent();
 
-            // 初始化Tag Table
+            // 初始化 Tag Table，使用空 Tag data
             tagList.Add(TagData.Empty);
+            // 建立可分類的 Tag 資料
             var data = new ObservableCollection<TagData>(tagList);
             TagDataSource = new ListCollectionView(data);
+            // 設定 data source
             _viewModel.DataSource = TagDataSource;
 
             // 初始化 project simple view
             projectSimpleView.init(this);
 
-            // add your custom map db provider
-            //MySQLPureImageCache ch = new MySQLPureImageCache();
-            //ch.ConnectionString = @"server=sql2008;User Id=trolis;Persist Security Info=True;database=gmapnetcache;password=trolis;";
-            //MainMap.Manager.SecondaryCache = ch;
+            // 初始化執行中個體
+            runningInstance = this;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             // 初始化地圖元件
-            // 設定地圖來源
-            gMap.MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
             // 設定語言
             GMap.NET.MapProviders.GMapProvider.Language = GMap.NET.LanguageType.ChineseTraditional;
             // 設定圖塊取得機制: ServerOnly, ServerAndCache, CacheOnly.
-            GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerOnly;
+            GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerAndCache;
+
+            // 設定地圖來源
+            gMap.MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
             // 設定初始檢視大小
             gMap.Zoom = 8;
             // 關閉顯示中心紅十字
@@ -101,6 +104,17 @@ namespace Mirle_GPLC
             // 設定初始位置
             gMap.Position = new PointLatLng(23.8, 121);
 
+            refreshData();
+
+            // 印出參數
+            //string str = "";
+            //foreach (string s in Environment.GetCommandLineArgs())
+            //    str += s+"\n";
+            //messageDialog("參數：", str);
+        }
+
+        public void refreshData()
+        {
             // 初始化目前標記為空值
             _currentMarker = null;
 
@@ -112,35 +126,30 @@ namespace Mirle_GPLC
             try
             {
                 // 載入專案資料
-                this.projectList = ModelUtil.getProjectList();
+                this.projectList = ModelUtil.getMapDeviceList();
                 // 加入專案列表
                 refreshProjectData(projectList);
             }
             catch (Exception ex)
             {
-                messageDialog("發生錯誤", "載入專案資料時發生錯誤\n"+ex.Message);
+                messageDialog("發生錯誤", "載入專案資料時發生錯誤\n" + ex.Message);
             }
-
-            // 印出參數
-            //string str = "";
-            //foreach (string s in Environment.GetCommandLineArgs())
-            //    str += s+"\n";
-            //messageDialog("參數：", str);
         }
 
-        private void refreshProjectData(List<ProjectData> pList)
+        private void refreshProjectData(List<DeviceData> pList)
         {
             // 更新專案列表
             // 清空專案列表
             projectListView.Items.Clear();
             gMap.Markers.Clear();
+            projectMarkerDictionary.Clear();
             // 反序地加入專案地圖標記，使得排序較前的專案有較高的z-index
             for (int i = pList.Count - 1; i >= 0; i--)
             {
                 GMapMarker pm = newProjectMarker(pList[i]);
             }
             // 加入專案列表
-            foreach (ProjectData p in pList)
+            foreach (DeviceData p in pList)
             {
                 projectListView.Items.Add(p);
             }
@@ -179,11 +188,11 @@ namespace Mirle_GPLC
         #endregion
 
         #region -- marker adding functions --
-        private GMapMarker newProjectMarker(ProjectData p)
+        private GMapMarker newProjectMarker(DeviceData p)
         {
             return newProjectMarker(new PointLatLng(p.lat, p.lng), p);
         }
-        private GMapMarker newProjectMarker(PointLatLng latlng, ProjectData p)
+        private GMapMarker newProjectMarker(PointLatLng latlng, DeviceData p)
         {
             GMapMarker marker = new GMapMarker(latlng);
             ProjectMarker pm = new ProjectMarker(this, marker, p);
@@ -215,7 +224,6 @@ namespace Mirle_GPLC
         // 搜尋Tag文字方塊文字變更事件處理
         private void textBox_searchTag_TextChanged(object sender, TextChangedEventArgs e)
         {
-            
             searchTag(textBox_searchTag.Text);
         }
 
@@ -268,10 +276,11 @@ namespace Mirle_GPLC
             if (item != null)
             {
                 // get project data
-                ProjectData p = item.Content as ProjectData;
+                DeviceData p = item.Content as DeviceData;
 
                 if (p != null)
                 {
+                    tabControl_main.SelectedItem = tabItem_map;
                     selectProject(p);
                 }
             }
@@ -291,42 +300,47 @@ namespace Mirle_GPLC
             // project marker 不能為 null
             Debug.Assert(pm != null);
 
+            // 設定 current marker
             CurrentMarker = pm;
+            // 開啟 project simple view
             initProjectSimpleView(pm.Project);
             // 開啟project flyout
             //initProjectDataViewFlyout(pm.Project);
         }
 
         // 選擇專案
-        private void selectProject(ProjectData project)
+        private void selectProject(DeviceData device)
         {
             // project 不能為 null
-            Debug.Assert(project != null);
+            Debug.Assert(device != null);
 
             // 更新專案列表的已選取專案
-            projectListView.SelectedItem = project;
+            projectListView.SelectedItem = device;
 
             // 更新地圖的目前 project marker
             ProjectMarker pm = null;
-            projectMarkerDictionary.TryGetValue(project, out pm);
+            projectMarkerDictionary.TryGetValue(device, out pm);
             CurrentMarker = pm;
 
             // 將專案位置設為中心並調整zoom大小
-            gMap.Position = new PointLatLng(project.lat, project.lng);
+            gMap.Position = new PointLatLng(device.lat, device.lng);
             gMap.Zoom = 16;
 
-            initProjectSimpleView(project);
+            //開啟simple view
+            initProjectSimpleView(device);
         }
 
-        private void initProjectSimpleView(ProjectData project)
+        // 開啟專案內容瀏覽 simple view
+        public void initProjectSimpleView(DeviceData device)
         {
             // 關閉flyout
             projectFlyout.IsOpen = false;
 
-            projectSimpleView.set(project);
+            // 設定 simple view 之 project
+            projectSimpleView.set(device);
 
             // 更新專案 Tag Table 內容
-            initProjectTagTable(project);
+            initProjectTagTable(device);
 
             // 重置 Tag Table scroll 為頂端
             dataGridScrollToTop(projectSimpleView.projectTagTable);
@@ -335,18 +349,18 @@ namespace Mirle_GPLC
         }
 
         // 開啟專案內容瀏覽 flyout
-        public void initProjectDataViewFlyout(ProjectData project)
+        public void initProjectDataViewFlyout(DeviceData device)
         {
             // 隱藏 simple view
             projectSimpleView.Visibility = Visibility.Hidden;
 
             // 初始化專案內容瀏覽畫面
-            projectFlyout.Header = project.name;
-            textBlock_projectAddr.Text = project.addr;
+            projectFlyout.Header = device.alias;
+            textBlock_projectAddr.Text = device.addr;
             textBox_searchTag.Text = "";
 
             // 更新專案 Tag Table 內容
-            initProjectTagTable(project);
+            initProjectTagTable(device);
 
             // 重置 Tag Table scroll 為頂端
             dataGridScrollToTop(projectTagTable);
@@ -355,66 +369,33 @@ namespace Mirle_GPLC
         }
 
         // 更新專案 Tag Table 內容
-        private void initProjectTagTable(ProjectData project)
+        private void initProjectTagTable(DeviceData device)
         {
             // 清空 Tag table
             TagTableClear();
             // 清空 Tag list
             tagList.Clear();
 
-            // 讀取專案內的裝置
-            List<DeviceData> devices = project.devices;
-
-            // 加入所有裝置的點位到 taglist
-            foreach (DeviceData device in devices)
-            {
-                tagList.AddRange(device.tags);
-            }
+            // 加入裝置的所有點位到 taglist
+            tagList.AddRange(device.tags);
             // 加入點位到Tag Table
             TagTableAdd(tagList);
             TagDataSource.Refresh();
         }
 
-        /* 位置鎖定縮放
-         * 
-         * 作法為
-         * 先記錄鎖定點在畫面的位置 (mouseLastZoom)
-         * 以鎖定點做為中心進行縮放 (Zoom+-)
-         * 
-         * 算出先前已記錄畫面位置的點與畫面中心的像素差 (renderOffset)
-         * 此像素差即為整張地圖所需的位移量
-         * 
-         * 算出新的中心點像素位置：鎖定點像素位置+位移量
-         * 算出中心點經緯座標：FromPixelToLatLng
-         */
-        public void positionLockZoom(GMapControl mapControl, PointLatLng lockPosition, int delta)
+        // 將傳入的 DataGrid 控制項的 scroll bar 移至頂端
+        private void dataGridScrollToTop(DataGrid control)
         {
-            // local position of lock position
-            GPoint mouseLastZoom = mapControl.FromLatLngToLocal(lockPosition);
-
-            // center zoom to project
-            mapControl.Position = lockPosition;
-            mapControl.Zoom += (delta > 0) ? 1 : -1;
-
-            int zoom = (int)mapControl.Zoom;
-
-            // compute render offset
-            GPoint renderOffset = GPoint.Empty;
-            renderOffset.X = (int)mapControl.RenderSize.Width / 2 - mouseLastZoom.X;
-            renderOffset.Y = (int)mapControl.RenderSize.Height / 2 - mouseLastZoom.Y;
-
-            // current pixel position of the project
-            GPoint positionPixel = mapControl.MapProvider.Projection.FromLatLngToPixel(lockPosition, zoom);
-
-            // new center position in pixel
-            positionPixel.Offset(renderOffset);
-
-            // compute and set the latlng of new center position
-            mapControl.Position = mapControl.MapProvider.Projection.FromPixelToLatLng(positionPixel, zoom);
+            var border = VisualTreeHelper.GetChild(control, 0) as Decorator;
+            if (border != null)
+            {
+                var scrollViewer = border.Child as ScrollViewer;
+                scrollViewer.ScrollToTop();
+            }
         }
 
         // 非同步對話方塊
-        private async void messageDialog(string title, string message)
+        public async void messageDialog(string title, string message)
         {
             var mySettings = new MetroDialogSettings()
             {
@@ -426,11 +407,12 @@ namespace Mirle_GPLC
             await this.ShowMessageAsync(title, message, MessageDialogStyle.Affirmative, mySettings);
         }
 
+        #region -- 專案、點位搜尋方法 --
         public void searchProject(string keywordCommand)
         {
             string[] keywordList = parseKeyword(keywordCommand);
 
-            foreach (ProjectData p in projectList)
+            foreach (DeviceData p in projectList)
             {
                 // removal phase
                 if (projectListView.Items.Contains(p))
@@ -477,15 +459,51 @@ namespace Mirle_GPLC
             keyword = reg.Replace(keyword.Trim(), " ");
             return keyword.Split(' ');
         }
-
-        private void dataGridScrollToTop(DataGrid control)
+        #endregion 
+        
+        /* 位置鎖定縮放
+         * 
+         * 作法為
+         * 先記錄鎖定點在畫面的位置 (mouseLastZoom)
+         * 以鎖定點做為中心進行縮放 (Zoom+-)
+         * 
+         * 算出先前已記錄畫面位置的點與畫面中心的像素差 (renderOffset)
+         * 此像素差即為整張地圖所需的位移量
+         * 
+         * 算出新的中心點像素位置：鎖定點像素位置+位移量
+         * 算出中心點經緯座標：FromPixelToLatLng
+         */
+        public void positionLockZoom(GMapControl mapControl, PointLatLng lockPosition, int delta)
         {
-            // scroll to top
-            var border = VisualTreeHelper.GetChild(control, 0) as Decorator;
-            if (border != null)
+            // local position of lock position
+            GPoint mouseLastZoom = mapControl.FromLatLngToLocal(lockPosition);
+
+            // center zoom to project
+            mapControl.Position = lockPosition;
+            mapControl.Zoom += (delta > 0) ? 1 : -1;
+
+            int zoom = (int)mapControl.Zoom;
+
+            // compute render offset
+            GPoint renderOffset = GPoint.Empty;
+            renderOffset.X = (int)mapControl.RenderSize.Width / 2 - mouseLastZoom.X;
+            renderOffset.Y = (int)mapControl.RenderSize.Height / 2 - mouseLastZoom.Y;
+
+            // current pixel position of the project
+            GPoint positionPixel = mapControl.MapProvider.Projection.FromLatLngToPixel(lockPosition, zoom);
+
+            // new center position in pixel
+            positionPixel.Offset(renderOffset);
+
+            // compute and set the latlng of new center position
+            mapControl.Position = mapControl.MapProvider.Projection.FromPixelToLatLng(positionPixel, zoom);
+        }
+
+        private void projectFlyout_IsOpenChanged(object sender, EventArgs e)
+        {
+            if (!projectFlyout.IsOpen)
             {
-                var scrollViewer = border.Child as ScrollViewer;
-                scrollViewer.ScrollToTop();
+                initProjectSimpleView(CurrentMarker.Project);
             }
         }
 

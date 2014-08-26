@@ -33,12 +33,12 @@ namespace Mirle_GPLC.CustomeMarkers
         GMapMarker Marker;
         MainWindow mainWindow;
         
-        public ProjectData Project;
+        public DeviceData Project;
         bool selected;
 
         public string name
         {
-            get { return Project.name; }
+            get { return Project.alias; }
         }
         public double lat
         {
@@ -68,7 +68,7 @@ namespace Mirle_GPLC.CustomeMarkers
         }
         
 
-        public ProjectMarker(MainWindow mainWindow , GMapMarker marker, ProjectData project)
+        public ProjectMarker(MainWindow mainWindow , GMapMarker marker, DeviceData project)
         {
             InitializeComponent();
 
@@ -77,10 +77,10 @@ namespace Mirle_GPLC.CustomeMarkers
             this.Project = project;
             selected = false;
 
-            initProjectMarker();
+            initProjectMarkerPopup();
         }
 
-        private void initProjectMarker()
+        private void initProjectMarkerPopup()
         {
             Popup = new Popup();
             Popup.Placement = PlacementMode.Mouse;
@@ -121,7 +121,7 @@ namespace Mirle_GPLC.CustomeMarkers
         {
             icon.Source = new BitmapImage(new Uri(markerFillPath));
             Marker.ZIndex += 100000;
-            ProjectMarkerTooltip tooltip = new ProjectMarkerTooltip();
+            DeviceMarkerTooltip tooltip = new DeviceMarkerTooltip();
             tooltip.SetValues(Project);
             Popup.Child = tooltip;
             Popup.IsOpen = true;

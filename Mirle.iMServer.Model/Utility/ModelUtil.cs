@@ -16,76 +16,66 @@ namespace Mirle.iMServer.Model
         private static Dictionary<string, Dictionary<string, float?>> trendTableManager
             = new Dictionary<string, Dictionary<string, float?>>();
 
-        #region -- get project list --
-        public static List<ProjectData> getProjectList()
+        #region -- get device list --
+        public static List<DeviceData> getMapDeviceList()
         {
-            List<ProjectData> pList = new List<ProjectData>();
+            List<DeviceData> dList = new List<DeviceData>();
             MySqlDbInterface db = new MySqlDbInterface();
             using (DbConnection conn = db.getConnection())
             {
                 conn.Open();
-                MySqlCommand cmd = new MySqlCommand("SELECT * FROM Project");
+                MySqlCommand cmd = new MySqlCommand("SELECT * FROM Device");
                 cmd.Connection = conn as MySqlConnection;
-                getProjectList(cmd, pList);
+                getDeviceList(cmd, dList);
             }
-            return pList;
+            return dList;
         }
 
-        public static List<ProjectData> getProjectList(string keyword)
+        public static List<DeviceData> getMapDeviceList(string keyword)
         {
-            List<ProjectData> pList = new List<ProjectData>();
+            List<DeviceData> dList = new List<DeviceData>();
             MySqlDbInterface db = new MySqlDbInterface();
             using (DbConnection conn = db.getConnection())
             {
                 conn.Open();
-                MySqlCommand cmd = new MySqlCommand("SELECT * FROM Project WHERE name LIKE @keyword");
+                MySqlCommand cmd = new MySqlCommand("SELECT * FROM Device WHERE alias LIKE @keyword");
                 cmd.Parameters.AddWithValue("@keyword", '%' + keyword + '%');
                 cmd.Connection = conn as MySqlConnection;
-                getProjectList(cmd, pList);
+                getDeviceList(cmd, dList);
             }
-            return pList;
+            return dList;
         }
 
-        public static List<ProjectData> getProjectList(string[] keywords)
+        public static List<DeviceData> getMapDeviceList(string[] keywords)
         {
-            List<ProjectData> pList = new List<ProjectData>();
+            List<DeviceData> dList = new List<DeviceData>();
             MySqlDbInterface db = new MySqlDbInterface();
             using (DbConnection conn = db.getConnection())
             {
                 int i = 0;
                 conn.Open();
-                MySqlCommand cmd = new MySqlCommand("SELECT * FROM Project WHERE FALSE");
+                MySqlCommand cmd = new MySqlCommand("SELECT * FROM Device WHERE FALSE");
                 cmd.Connection = conn as MySqlConnection;
                 foreach (string keyword in keywords)
                 {
-                    cmd.CommandText += " OR name LIKE @keyword" + i;
+                    cmd.CommandText += " OR alias LIKE @keyword" + i;
                     cmd.Parameters.AddWithValue("@keyword" + i, '%' + keyword + '%');
                     i++;
                 }
-                getProjectList(cmd, pList);
+                getDeviceList(cmd, dList);
             }
-            return pList;
+            return dList;
         }
 
-        public static void getProjectList(MySqlCommand cmd, List<ProjectData> pList)
-        {
-            using (MySqlDataReader reader = cmd.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    // get column values
-                    pList.Add(
-                        new ProjectData(reader.GetInt64("id"), reader.GetString("name"),
-                            reader.GetString("alias"), reader.GetString("addr"),
-                            reader.GetDouble("lat"), reader.GetDouble("lng"))
-                    );
-                }
-            }
-        }
-        #endregion
-
-        #region -- get device list --
         public static List<DeviceData> getDeviceList()
+        {
+            HashSet<DeviceData> deviceSet = new HashSet<DeviceData>(getRawDeviceList());
+            HashSet<DeviceData> mapDeviceSet = new HashSet<DeviceData>(getMapDeviceList());
+            mapDeviceSet.UnionWith(deviceSet);
+            return mapDeviceSet.ToList();
+        }
+
+        public static List<DeviceData> getRawDeviceList()
         {
             List<DeviceData> dList = new List<DeviceData>();
             MySqlDbInterface db = new MySqlDbInterface();
@@ -94,36 +84,34 @@ namespace Mirle.iMServer.Model
                 conn.Open();
                 MySqlCommand cmd = new MySqlCommand("SELECT DISTINCT(device) FROM loginfo");
                 cmd.Connection = conn as MySqlConnection;
-                getDeviceList(cmd, ProjectData.Empty, dList);
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        // get column values
+                        dList.Add(new DeviceData(reader.GetString("device")));
+                    }
+                }
             }
             return dList;
         }
-        public static List<DeviceData> getDeviceList(ProjectData project)
-        {
-            List<DeviceData> dList = new List<DeviceData>();
-            MySqlDbInterface db = new MySqlDbInterface();
-            using (DbConnection conn = db.getConnection())
-            {
-                conn.Open();
-                MySqlCommand cmd = new MySqlCommand("SELECT * FROM ProjectDevice WHERE log_name = @log_name");
-                cmd.Parameters.AddWithValue("@log_name", project.alias);
-                cmd.Connection = conn as MySqlConnection;
-                getDeviceList(cmd, project, dList);
-            }
-            return dList;
-        }
-        public static void getDeviceList(MySqlCommand cmd, ProjectData project, List<DeviceData> dList)
+
+        private static void getDeviceList(MySqlCommand cmd, List<DeviceData> dList)
         {
             using (MySqlDataReader reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
                     // get column values
-                    DeviceData d = new DeviceData(project, reader.GetString("device"));
-                    dList.Add(d);
+                    dList.Add(
+                        new DeviceData(reader.GetInt64("id"), reader.GetString("alias"),
+                            reader.GetString("deviceName"), reader.GetString("addr"),
+                            reader.GetDouble("lat"), reader.GetDouble("lng"))
+                    );
                 }
             }
         }
+
         #endregion
 
         #region -- get tag list --
@@ -136,7 +124,7 @@ namespace Mirle.iMServer.Model
             {
                 conn.Open();
                 MySqlCommand cmd = new MySqlCommand("SELECT * FROM loginfo WHERE device = @device");
-                cmd.Parameters.AddWithValue("@device", device.name);
+                cmd.Parameters.AddWithValue("@device", device.deviceName);
                 cmd.Connection = conn as MySqlConnection;
                 getTagList(cmd, device, tList);
             }
@@ -158,6 +146,41 @@ namespace Mirle.iMServer.Model
             }
         }
         #endregion
+
+        public static int insertDervice(DeviceData device)
+        {
+            MySqlDbInterface db = new MySqlDbInterface();
+            string insertCommand =
+                @"INSERT INTO Device(alias,addr,lat,lng,deviceName)"
+                + " VALUES (@alias,@addr,@lat,@lng,@deviceName);";
+
+            MySqlCommand cmd = new MySqlCommand(insertCommand);
+            cmd.Parameters.AddWithValue("@alias", device.alias);
+            cmd.Parameters.AddWithValue("@addr", device.addr);
+            cmd.Parameters.AddWithValue("@lat", device.lat);
+            cmd.Parameters.AddWithValue("@lng", device.lng);
+            cmd.Parameters.AddWithValue("@deviceName", device.deviceName);
+
+            return db.execInsert(cmd);
+        }
+
+        public static int updateDervice(DeviceData device)
+        {
+            MySqlDbInterface db = new MySqlDbInterface();
+            string updateCommand = @"UPDATE Device SET alias=@alias,"
+                + "addr=@addr,lat=@lat,lng=@lng,deviceName=@deviceName"
+                + " WHERE id=@id;";
+
+            MySqlCommand cmd = new MySqlCommand(updateCommand);
+            cmd.Parameters.AddWithValue("@id", device.id);
+            cmd.Parameters.AddWithValue("@alias", device.alias);
+            cmd.Parameters.AddWithValue("@addr", device.addr);
+            cmd.Parameters.AddWithValue("@lat", device.lat);
+            cmd.Parameters.AddWithValue("@lng", device.lng);
+            cmd.Parameters.AddWithValue("@deviceName", device.deviceName);
+
+            return db.execUpdate(cmd);
+        }
 
         public static float? getTagVal(TagData tag)
         {

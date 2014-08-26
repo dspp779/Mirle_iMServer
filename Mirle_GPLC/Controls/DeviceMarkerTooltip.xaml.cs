@@ -6,17 +6,17 @@ namespace Mirle_GPLC.Controls
    /// <summary>
    /// Interaction logic for TrolleyTooltip.xaml
    /// </summary>
-    public partial class ProjectMarkerTooltip : UserControl
+    public partial class DeviceMarkerTooltip : UserControl
     {
-        public ProjectMarkerTooltip()
+        public DeviceMarkerTooltip()
         {
             InitializeComponent();
         }
 
-        public void SetValues(ProjectData project)
+        public void SetValues(DeviceData device)
         {
-            textblock_ProjectName.Text = project.name;
-            textBlock_DeviceNum.Text = project.devices.Count.ToString();
+            textBlock_DeviceName.Text = device.ToString();
+            textBlock_TagNum.Text = device.tags.Count.ToString();
             //TimeGps.Text = project.lat.ToString();
             //Area.Text = project.lng.ToString();
         }

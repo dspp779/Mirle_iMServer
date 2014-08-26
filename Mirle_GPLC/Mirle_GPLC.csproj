@@ -127,17 +127,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="Controls\projectEditControl.xaml">
+    <Page Include="Controls\DeviceEditControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\ProjectView.xaml">
+    <Page Include="Controls\DeviceSimpleView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\ProjectMarkerTooltip.xaml">
+    <Page Include="Controls\DeviceMarkerTooltip.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="CustomeMarkers\ClickMarker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CustomeMarkers\ProjectMarker.xaml">
       <SubType>Designer</SubType>
@@ -151,14 +155,17 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Controls\projectEditControl.xaml.cs">
-      <DependentUpon>projectEditControl.xaml</DependentUpon>
+    <Compile Include="Controls\DeviceEditControl.xaml.cs">
+      <DependentUpon>DeviceEditControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ProjectView.xaml.cs">
-      <DependentUpon>ProjectView.xaml</DependentUpon>
+    <Compile Include="Controls\DeviceSimpleView.xaml.cs">
+      <DependentUpon>DeviceSimpleView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ProjectMarkerTooltip.xaml.cs">
-      <DependentUpon>ProjectMarkerTooltip.xaml</DependentUpon>
+    <Compile Include="Controls\DeviceMarkerTooltip.xaml.cs">
+      <DependentUpon>DeviceMarkerTooltip.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CustomeMarkers\ClickMarker.xaml.cs">
+      <DependentUpon>ClickMarker.xaml</DependentUpon>
     </Compile>
     <Compile Include="CustomeMarkers\ProjectMarker.xaml.cs">
       <DependentUpon>ProjectMarker.xaml</DependentUpon>
@@ -368,6 +375,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="CustomeMarkers\ProjectMarkerFill.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="CustomeMarkers\ClickMarker.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

@@ -60,7 +60,7 @@ namespace Mirle.iMServer.Model
         }
         public string DeviceName
         {
-            get { return _device.name; }
+            get { return _device.deviceName; }
         }
         public string Value
         {
@@ -73,7 +73,7 @@ namespace Mirle.iMServer.Model
         public TagData()
         {
             _id = _io_addr = 0;
-            _table = _name = _log_id = _log_name = _tag = _tag_memo = "EmptyTag";
+            _table = _name = _log_id = _log_name = _tag = _tag_memo = "";
             _device = DeviceData.Empty;
         }
 
