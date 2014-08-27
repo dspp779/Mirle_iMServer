@@ -7,7 +7,7 @@
              xmlns:Mirle_GPLC="clr-namespace:Mirle_GPLC"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Mirle_GPLC:MainWindowViewModel}"
-             d:DesignHeight="300" d:DesignWidth="300" Background="{DynamicResource AccentColorBrush}" MouseMove="UserControl_MouseMove" MouseLeftButtonDown="UserControl_MouseLeftButtonDown" MouseLeftButtonUp="UserControl_MouseLeftButtonUp">
+             d:DesignHeight="300" d:DesignWidth="300" Background="{DynamicResource AccentColorBrush}" MouseMove="DeviceSimpleView_MouseMove" MouseLeftButtonDown="DeviceSimpleView_MouseLeftButtonDown" MouseLeftButtonUp="DeviceSimpleView_MouseLeftButtonUp">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

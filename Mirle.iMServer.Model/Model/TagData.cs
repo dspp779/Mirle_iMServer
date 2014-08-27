@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mirle.iMServer.Model.Utility;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -94,11 +95,11 @@ namespace Mirle.iMServer.Model
         /* check if tag satisfy keyword rule
          * note: AND rule is used int this method
          * */
-        public bool containsKeyword(string[] keywords)
+        public bool Contains(string[] keywords)
         {
             foreach (string keyword in keywords)
             {
-                if (!_log_name.Contains(keyword))
+                if (!Contains(_log_name, keyword, StringComparison.CurrentCultureIgnoreCase))
                 {
                     return false;
                 }
@@ -106,12 +107,15 @@ namespace Mirle.iMServer.Model
             return true;
         }
 
+        private static bool Contains(string source, string toCheck, StringComparison comp)
+        {
+            return source.IndexOf(toCheck, comp) >= 0;
+        }
+
         public override string ToString()
         {
             return _log_name;
         }
-
-
 
         public void NotifyValueChanged()
         {
@@ -125,15 +129,16 @@ namespace Mirle.iMServer.Model
         {
             if (this.Equals(TagData.Empty))
                 return null;
-            float? f = ModelUtil.getTagVal(this);
+            float? f = (float?)TrendDataManager.getTagVal(this);
             return f != null ? f : null;
         }
 
+        // get tag value and return in text format
         private string getTextVal()
         {
             if (this.Equals(TagData.Empty))
                 return "null";
-            float? f = ModelUtil.getTagVal(this);
+            float? f = (float?)TrendDataManager.getTagVal(this);
             return f != null ? f.ToString() : "null";
         }
     }

@@ -21,7 +21,7 @@ using System.Windows.Shapes;
 namespace Mirle_GPLC.Controls
 {
     /// <summary>
-    /// projectEditControl.xaml 的互動邏輯
+    /// DeviceEditControl.xaml 的互動邏輯
     /// </summary>
     public partial class DeviceEditControl : UserControl
     {
@@ -40,6 +40,7 @@ namespace Mirle_GPLC.Controls
             }
         }
 
+        // 紀錄目前選擇的device
         private DeviceData _device = new DeviceData();
         public DeviceData Device
         {
@@ -54,23 +55,33 @@ namespace Mirle_GPLC.Controls
                 {
                     _device = DeviceData.Empty;
                 }
+                // 更新 textbox 的值
                 textBlock_deviceName.Text = _device.deviceName;
                 textBox_deviceAlias.Text = _device.alias;
                 textBox_deviceAddr.Text = _device.addr;
-                textBox_lng.Text = _device.lng.ToString();
-                textBox_lat.Text = _device.lat.ToString();
+                // 更新地圖選取位置與縮放，id > 0 代表已設定位置
                 if (_device.id > 0)
                 {
+                    textBox_lng.Text = _device.lng.ToString();
+                    textBox_lat.Text = _device.lat.ToString();
+                    // 調整標記與地圖的位置
                     PointLatLng position = new PointLatLng(_device.lat, _device.lng);
-                    markerPosition = position;
+                    MarkerPosition = position;
                     Map_SetPosition.Position = position;
+                    // 如果Zoom沒改變，標記位置可能會出錯
+                    Map_SetPosition.Zoom = 17;
                     Map_SetPosition.Zoom = 18;
+                }
+                else
+                {
+                    //textBox_lng.Text = textBox_lat.Text = "";
                 }
             }
         }
 
+        // 地圖的標記，及其位置變更處理
         private GMapMarker currMarker;
-        private PointLatLng markerPosition
+        private PointLatLng MarkerPosition
         {
             get { return currMarker.Position; }
             set
@@ -82,8 +93,6 @@ namespace Mirle_GPLC.Controls
                     Map_SetPosition.Markers.Add(currMarker);
                 }
                 currMarker.Position = value;
-                textBox_lng.Text = currMarker.Position.Lng.ToString();
-                textBox_lat.Text = currMarker.Position.Lat.ToString();
             }
         }
         public DeviceEditControl()
@@ -102,6 +111,7 @@ namespace Mirle_GPLC.Controls
 
         private void DeviceEditUserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            listBox_devices.UnselectAll();
             // 設定地圖來源
             Map_SetPosition.MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
             // 設定初始檢視大小
@@ -109,11 +119,10 @@ namespace Mirle_GPLC.Controls
             // 關閉顯示中心紅十字
             Map_SetPosition.ShowCenter = false;
             // 設定滑鼠滑動地圖按鈕為右鍵 (預設為右鍵)
-            Map_SetPosition.DragButton = MouseButton.Right;
+            Map_SetPosition.DragButton = MouseButton.Left;
             // 設定初始位置
             Map_SetPosition.Position = new PointLatLng(23.8, 121);
-
-            listBox_devices.UnselectAll();
+            textBox_lng.Text = textBox_lat.Text = "";
         }
 
         public void init(MainWindow mainWindow)
@@ -124,11 +133,6 @@ namespace Mirle_GPLC.Controls
         private void refreshDeviceList()
         {
             deviceList = ModelUtil.getDeviceList();
-        }
-
-        private void button_reset_Click(object sender, RoutedEventArgs e)
-        {
-            Device = listBox_devices.SelectedItem as DeviceData;
         }
 
         private void listBox_devices_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -214,26 +218,74 @@ namespace Mirle_GPLC.Controls
             mapControl.Position = mapControl.MapProvider.Projection.FromPixelToLatLng(positionPixel, zoom);
         }
 
-        private void Map_SetPosition_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Map_SetPosition_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
+            // if not dragging, place marker
             if (!Map_SetPosition.IsDragging)
             {
                 Point p = e.GetPosition(Map_SetPosition);
-                markerPosition = Map_SetPosition.FromLocalToLatLng((int)p.X, (int)p.Y);
+                MarkerPosition = Map_SetPosition.FromLocalToLatLng((int)p.X, (int)p.Y);
+                refreshLatlngTextBox();
+                // zoom adjuctment
                 if (Map_SetPosition.Zoom < 16)
                 {
-                    positionLockZoom(Map_SetPosition, markerPosition, 5);
+                    positionLockZoom(Map_SetPosition, MarkerPosition, 5);
                 }
                 else if (Map_SetPosition.Zoom < 18)
                 {
-                    positionLockZoom(Map_SetPosition, markerPosition, 18 - (int)Map_SetPosition.Zoom);
+                    positionLockZoom(Map_SetPosition, MarkerPosition, 18 - (int)Map_SetPosition.Zoom);
                 }
             }
         }
 
-        private void textBox_latlng_TextChanged(object sender, TextChangedEventArgs e)
+        #region -- textbox latlng --
+
+        private void refreshLatlngTextBox()
         {
+            textBox_lng.Text = currMarker.Position.Lng.ToString();
+            textBox_lat.Text = currMarker.Position.Lat.ToString();
         }
-        
+
+        private void textBox_lat_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (float.TryParse(textBox_lat.Text.Trim(), out lat) && textBox_lat.IsFocused)
+            {
+                PointLatLng position = new PointLatLng(lat, 0);
+                if (currMarker == null)
+                {
+                    currMarker = new GMapMarker(position);
+                    currMarker.Shape = new ClickMarker(this, currMarker);
+                    Map_SetPosition.Markers.Add(currMarker);
+                }
+                else
+                {
+                    position.Lng = currMarker.Position.Lng;
+                }
+                currMarker.Position = position;
+                Map_SetPosition.Position = position;
+            }
+        }
+
+        private void textBox_lng_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (float.TryParse(textBox_lng.Text.Trim(), out lng) && textBlock_lng.IsFocused)
+            {
+                PointLatLng position = new PointLatLng(0, lng);
+                if (currMarker == null)
+                {
+                    currMarker = new GMapMarker(position);
+                    currMarker.Shape = new ClickMarker(this, currMarker);
+                    Map_SetPosition.Markers.Add(currMarker);
+                }
+                else
+                {
+                    position.Lat = currMarker.Position.Lat;
+                }
+                currMarker.Position = position;
+                Map_SetPosition.Position = position;
+            }
+        }
+        #endregion
+
     }
 }

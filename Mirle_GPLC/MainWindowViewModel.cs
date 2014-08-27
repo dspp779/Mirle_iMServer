@@ -32,6 +32,7 @@ namespace Mirle_GPLC
             var theme = ThemeManager.DetectAppStyle(Application.Current);
             var accent = ThemeManager.GetAccent(this.Name);
             ThemeManager.ChangeAppStyle(Application.Current, accent, theme.Item1);
+            MainWindow.runningInstance.OnThemeChanged(this);
         }
     }
     
@@ -69,12 +70,15 @@ namespace Mirle_GPLC
                                             .Select(a => new AccentColorMenuData()
                                             { Name = a.Name, ColorBrush = a.Resources["AccentColorBrush"] as Brush })
                                             .ToList();
+            setting = new GplcSettings(this);
         }
 
         public string Title { get; set; }
         public int SelectedIndex { get; set; }
         public List<AccentColorMenuData> AccentColors { get; set; }
         
+        public GplcSettings setting { get; set;}
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>

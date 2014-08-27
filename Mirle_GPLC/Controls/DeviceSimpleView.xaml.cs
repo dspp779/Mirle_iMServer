@@ -1,4 +1,5 @@
 ﻿using Mirle.iMServer.Model;
+using Mirle.iMServer.Model.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,13 +17,13 @@ using System.Windows.Shapes;
 namespace Mirle_GPLC.Controls
 {
     /// <summary>
-    /// ProjectView.xaml 的互動邏輯
+    /// DeviceSimpleView.xaml 的互動邏輯
     /// </summary>
     public partial class DeviceSimpleView : UserControl
     {
 
         private MainWindow mainWindow;
-        private DeviceData project;
+        private DeviceData device;
 
         private bool isDragging;
         private Point clickPosition;
@@ -39,10 +40,12 @@ namespace Mirle_GPLC.Controls
             this.projectTagTable.LostMouseCapture += (sender, e) => { this.isDragging = false; };
         }
 
-        public void set(DeviceData p)
+        public void set(DeviceData d)
         {
-            this.project = p;
-            textBlock_projectName.Text = project.alias;
+            this.device = d;
+            textBlock_projectName.Text = device.alias;
+            device.reload();
+            TrendDataManager.registerDeviceTagRefresh(device.tags);
         }
 
         private void textBox_searchTag_TextChanged(object sender, TextChangedEventArgs e)
@@ -53,20 +56,22 @@ namespace Mirle_GPLC.Controls
         private void button_close_Click(object sender, RoutedEventArgs e)
         {
             this.Visibility = Visibility.Hidden;
+            TrendDataManager.cancelDeviceTagRefresh();
         }
 
         private void button_expand_Click(object sender, RoutedEventArgs e)
         {
-            mainWindow.initProjectDataViewFlyout(project);
+            mainWindow.initProjectDataViewFlyout(device);
         }
 
-        private void UserControl_MouseMove(object sender, MouseEventArgs e)
+        private void DeviceSimpleView_MouseMove(object sender, MouseEventArgs e)
         {
             var draggableControl = sender as UserControl;
 
             if (isDragging && draggableControl != null)
             {
-                Point currentPosition = e.GetPosition(this.Parent as UIElement);
+                UIElement parent = this.Parent as UIElement;
+                Point currentPosition = e.GetPosition(parent);
 
                 var tranform = draggableControl.RenderTransform as TranslateTransform;
                 if (tranform == null)
@@ -76,10 +81,24 @@ namespace Mirle_GPLC.Controls
                 }
                 tranform.X = currentPosition.X - clickPosition.X + renderTransform.X;
                 tranform.Y = currentPosition.Y - clickPosition.Y + renderTransform.Y;
+                // draggable control boundary condition
+                double boundary;
+                tranform.Y = (tranform.Y > -draggableControl.Margin.Top) ?
+                    tranform.Y : -draggableControl.Margin.Top;
+                boundary = draggableControl.Margin.Bottom + draggableControl.RenderSize.Height - 20;
+                tranform.Y = (tranform.Y < boundary) ?
+                    tranform.Y : boundary;
+                boundary = draggableControl.Margin.Left + draggableControl.RenderSize.Width - 10;
+                tranform.X = (tranform.X < boundary) ?
+                    tranform.X : boundary;
+                boundary = draggableControl.Margin.Left + draggableControl.RenderSize.Width
+                    - parent.RenderSize.Width;
+                tranform.X = (tranform.X > boundary) ?
+                    tranform.X : boundary;
             }
         }
 
-        private void UserControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void DeviceSimpleView_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             isDragging = true;
             var draggableControl = sender as UserControl;
@@ -87,7 +106,7 @@ namespace Mirle_GPLC.Controls
             draggableControl.CaptureMouse();
         }
 
-        private void UserControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void DeviceSimpleView_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             isDragging = false;
             var draggableControl = sender as UserControl;

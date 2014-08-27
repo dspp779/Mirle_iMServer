@@ -15,6 +15,8 @@ using System.Windows.Data;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
 using System.Diagnostics;
+using Mirle.iMServer.Model.Utility;
+using MahApps.Metro;
 
 namespace Mirle_GPLC
 {
@@ -64,6 +66,9 @@ namespace Mirle_GPLC
 
         public MainWindow()
         {
+            // 初始化執行中個體
+            runningInstance = this;
+
             // 設定 DataContext
             _viewModel = new MainWindowViewModel();
             DataContext = _viewModel;
@@ -81,8 +86,6 @@ namespace Mirle_GPLC
             // 初始化 project simple view
             projectSimpleView.init(this);
 
-            // 初始化執行中個體
-            runningInstance = this;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -94,7 +97,8 @@ namespace Mirle_GPLC
             GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerAndCache;
 
             // 設定地圖來源
-            gMap.MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
+            //gMap.MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
+            gMap.MapProvider = _viewModel.setting.MapProvider;
             // 設定初始檢視大小
             gMap.Zoom = 8;
             // 關閉顯示中心紅十字
@@ -103,6 +107,8 @@ namespace Mirle_GPLC
             gMap.DragButton = MouseButton.Left;
             // 設定初始位置
             gMap.Position = new PointLatLng(23.8, 121);
+
+            ChangeTheme(_viewModel.setting.AccentColor);
 
             refreshData();
 
@@ -247,7 +253,12 @@ namespace Mirle_GPLC
             _shutdown = result == MessageDialogResult.Affirmative;
 
             if (_shutdown)
+            {
+                // 將 Trend data worker 關閉
+                // (非必要，關閉應用程式會自動關閉背景工作)
+                TrendDataManager.cancelDeviceTagRefresh();
                 Application.Current.Shutdown();
+            }
         }
 
         // 專案選項變更事件處理
@@ -324,6 +335,9 @@ namespace Mirle_GPLC
 
             // 將專案位置設為中心並調整zoom大小
             gMap.Position = new PointLatLng(device.lat, device.lng);
+
+            // 如果Zoom沒改變，標記位置可能會出錯
+            gMap.Zoom = 17;
             gMap.Zoom = 16;
 
             //開啟simple view
@@ -336,7 +350,7 @@ namespace Mirle_GPLC
             // 關閉flyout
             projectFlyout.IsOpen = false;
 
-            // 設定 simple view 之 project
+            // 設定 simple view 之 device
             projectSimpleView.set(device);
 
             // 更新專案 Tag Table 內容
@@ -417,13 +431,13 @@ namespace Mirle_GPLC
                 // removal phase
                 if (projectListView.Items.Contains(p))
                 {
-                    if (!p.containsKeyword(keywordList))
+                    if (!p.Contains(keywordList))
                         projectListView.Items.Remove(p);
                 }
                 // add back phase
                 else
                 {
-                    if (p.containsKeyword(keywordList))
+                    if (p.Contains(keywordList))
                         projectListView.Items.Add(p);
                 }
             }
@@ -438,13 +452,13 @@ namespace Mirle_GPLC
                 // removal phase
                 if (TagDataSource.Contains(t))
                 {
-                    if (!t.containsKeyword(keywordList))
+                    if (!t.Contains(keywordList))
                         TagDataSource.Remove(t);
                 }
                 // add back phase
                 else
                 {
-                    if (t.containsKeyword(keywordList))
+                    if (t.Contains(keywordList))
                         TagTableAdd(t);
                 }
             }
@@ -507,5 +521,24 @@ namespace Mirle_GPLC
             }
         }
 
+        private void gMap_OnMapTypeChanged(GMapProvider type)
+        {
+            _viewModel.setting.MapProvider = type;
+
+        }
+
+        private void ChangeTheme(AccentColorMenuData accentColor)
+        {
+            var theme = ThemeManager.DetectAppStyle(Application.Current);
+            var accent = ThemeManager.GetAccent(accentColor.Name);
+            ThemeManager.ChangeAppStyle(Application.Current, accent, theme.Item1);
+            OnThemeChanged(accentColor);
+        }
+
+
+        public void OnThemeChanged(AccentColorMenuData accentColor)
+        {
+            _viewModel.setting.AccentColor = accentColor;
+        }
     }
 }

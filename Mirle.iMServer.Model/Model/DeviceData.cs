@@ -106,16 +106,23 @@ namespace Mirle.iMServer.Model
             NotifyValueChanged("DisplayName");
         }
 
-        public bool containsKeyword(string[] keywords)
+        public bool Contains(string[] keywords)
         {
+            string str = String.Concat(deviceName);
             foreach (string keyword in keywords)
             {
-                if (alias.Contains(keyword))
+                // comparison ignore case
+                if (Contains(str, keyword, StringComparison.CurrentCultureIgnoreCase))
                 {
                     return true;
                 }
             }
             return false;
+        }
+
+        private static bool Contains(string source, string toCheck, StringComparison comp)
+        {
+            return source.IndexOf(toCheck, comp) >= 0;
         }
 
         public override int GetHashCode()

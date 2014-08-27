@@ -81,6 +81,13 @@ namespace Mirle.iMServer.Model.Db
                 return cmd.ExecuteNonQuery();
             }
         }
+        public int execUpdate(string cmdstr)
+        {
+            using (DbCommand cmd = new MySqlCommand(cmdstr))
+            {
+                return execUpdate(cmd);
+            }
+        }
 
         /* execute an update SQL command such as CREATE TABLE, INSERT, UPDATE...etc.
          * return number of modified record

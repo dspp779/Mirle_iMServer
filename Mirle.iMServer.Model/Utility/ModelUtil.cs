@@ -12,10 +12,6 @@ namespace Mirle.iMServer.Model
 {
     public class ModelUtil
     {
-        // 監測值資料快取
-        private static Dictionary<string, Dictionary<string, float?>> trendTableManager
-            = new Dictionary<string, Dictionary<string, float?>>();
-
         #region -- get device list --
         public static List<DeviceData> getMapDeviceList()
         {
@@ -24,7 +20,11 @@ namespace Mirle.iMServer.Model
             using (DbConnection conn = db.getConnection())
             {
                 conn.Open();
-                MySqlCommand cmd = new MySqlCommand("SELECT * FROM Device");
+                //string cmdstr = "SELECT * FROM Device";
+                string cmdstr = "SELECT * FROM device, "
+                    + "(SELECT DISTINCT(device) FROM loginfo) as deviceinfo"
+                    + " where deviceName = device";
+                MySqlCommand cmd = new MySqlCommand(cmdstr);
                 cmd.Connection = conn as MySqlConnection;
                 getDeviceList(cmd, dList);
             }
@@ -71,6 +71,7 @@ namespace Mirle.iMServer.Model
         {
             HashSet<DeviceData> deviceSet = new HashSet<DeviceData>(getRawDeviceList());
             HashSet<DeviceData> mapDeviceSet = new HashSet<DeviceData>(getMapDeviceList());
+            //mapDeviceSet.IntersectWith(deviceSet);
             mapDeviceSet.UnionWith(deviceSet);
             return mapDeviceSet.ToList();
         }
@@ -98,16 +99,30 @@ namespace Mirle.iMServer.Model
 
         private static void getDeviceList(MySqlCommand cmd, List<DeviceData> dList)
         {
-            using (MySqlDataReader reader = cmd.ExecuteReader())
+            try
             {
-                while (reader.Read())
+                using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
-                    // get column values
-                    dList.Add(
-                        new DeviceData(reader.GetInt64("id"), reader.GetString("alias"),
-                            reader.GetString("deviceName"), reader.GetString("addr"),
-                            reader.GetDouble("lat"), reader.GetDouble("lng"))
-                    );
+                    while (reader.Read())
+                    {
+                        // get column values
+                        dList.Add(
+                            new DeviceData(reader.GetInt64("id"), reader.GetString("alias"),
+                                reader.GetString("deviceName"), reader.GetString("addr"),
+                                reader.GetDouble("lat"), reader.GetDouble("lng"))
+                        );
+                    }
+                }
+            }
+            catch (MySqlException ex)
+            {
+                switch (ex.Number)
+                {
+                    case 1146:
+                        createDeviceTable();
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -147,6 +162,7 @@ namespace Mirle.iMServer.Model
         }
         #endregion
 
+        #region -- device update methods --
         public static int insertDervice(DeviceData device)
         {
             MySqlDbInterface db = new MySqlDbInterface();
@@ -181,71 +197,19 @@ namespace Mirle.iMServer.Model
 
             return db.execUpdate(cmd);
         }
+        #endregion
 
-        public static float? getTagVal(TagData tag)
-        {
-            float? value = null;
-            Dictionary<string, float?> trendTable = null;
-            // 檢查監測資料是否已經讀取
-            if (!trendTableManager.TryGetValue(tag.Table, out trendTable))
-            {
-                // 未讀取，新增字典供監測資料讀取
-                trendTable = new Dictionary<string, float?>();
-                // 監測資料讀取
-                refreshRowVal(tag.Table, trendTable);
-                // 存放在trenTableManager
-                trendTableManager.Add(tag.Table, trendTable);
-            }
-            trendTable.TryGetValue(tag.log_id, out value);
-            return value;
-        }
-
-        private static void refreshRowVal(string table, Dictionary<string, float?> trendTable)
+        #region -- create table --
+        private static void createDeviceTable()
         {
             MySqlDbInterface db = new MySqlDbInterface();
-            using (DbConnection conn = db.getConnection())
-            {
-                conn.Open();
-                // get the newest row
-                string cmdstr = string.Format("SELECT * FROM {0} ORDER BY 'datetime' LIMIT 1", table);
-                MySqlCommand cmd = new MySqlCommand(cmdstr);
-                //cmd.Parameters.AddWithValue("@table", tag.table);
-                cmd.Connection = conn as MySqlConnection;
-                using (MySqlDataReader reader = cmd.ExecuteReader())
-                {
-                    DataTable schemaTable = reader.GetSchemaTable();
-                    if (reader.Read())
-                    {
-                        foreach (DataRow row in schemaTable.Rows)
-                        {
-                            string columnName = row[schemaTable.Columns[0]].ToString();
-                            float? value = null;
-                            try
-                            {
-                                value = reader.GetFloat(columnName);
-                            }
-                            catch (Exception) { };
-                            // add or update
-                            if (trendTable.ContainsKey(columnName))
-                            {
-                                trendTable[columnName] = value;
-                            }
-                            else
-                            {
-                                trendTable.Add(columnName, value);
-                            }
-                        }
-                    }
-                }
-            }
+            string cmd =
+                "CREATE TABLE IF NOT EXISTS device"
+                + "(id bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY, "
+                + "alias text, addr text, lat double, lng double, "
+                + "deviceName varchar(64) NOT NULL) DEFAULT CHARSET=utf8";
+            db.execUpdate(cmd);
         }
-
-        private static void refreshAllCacheVal()
-        {
-            foreach (KeyValuePair<string, Dictionary<string, float?>> table in trendTableManager)
-            {
-                refreshRowVal(table.Key, table.Value);
-            }
-        }
+        #endregion
     }
 }

@@ -170,6 +170,7 @@
     <Compile Include="CustomeMarkers\ProjectMarker.xaml.cs">
       <DependentUpon>ProjectMarker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GplcSettings.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

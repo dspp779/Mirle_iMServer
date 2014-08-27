@@ -4,7 +4,7 @@ using System.Windows.Controls;
 namespace Mirle_GPLC.Controls
 {
    /// <summary>
-   /// Interaction logic for TrolleyTooltip.xaml
+   /// Interaction logic for DeviceMarkerTooltip.xaml
    /// </summary>
     public partial class DeviceMarkerTooltip : UserControl
     {
@@ -17,8 +17,6 @@ namespace Mirle_GPLC.Controls
         {
             textBlock_DeviceName.Text = device.ToString();
             textBlock_TagNum.Text = device.tags.Count.ToString();
-            //TimeGps.Text = project.lat.ToString();
-            //Area.Text = project.lng.ToString();
         }
     }
 }

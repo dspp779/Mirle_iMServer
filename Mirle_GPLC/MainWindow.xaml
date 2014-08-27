@@ -147,7 +147,7 @@
             <Controls:MetroAnimatedTabControl Name="tabControl_main" Grid.Column="1" Grid.RowSpan="2" Background="{DynamicResource Background}">
                 <TabItem Header="地圖瀏覽" Name="tabItem_map">
                     <Grid>
-                        <GMap:GMapControl Margin="0,0,0,0" Name="gMap" MaxZoom="20" MinZoom="3" MouseWheelZoomType="MousePositionWithoutCenter" />
+                        <GMap:GMapControl Margin="0,0,0,0" Name="gMap" MaxZoom="20" MinZoom="3" MouseWheelZoomType="MousePositionWithoutCenter" OnMapTypeChanged="gMap_OnMapTypeChanged" />
                         <GplcControls:DeviceSimpleView x:Name="projectSimpleView" HorizontalAlignment="Right" Width="232" Margin="0,130,10,160" />
                     </Grid>
                 </TabItem>
@@ -171,13 +171,13 @@
                             </ComboBox.SelectedItem>
                         </ComboBox>
                         <Menu Margin="240,5,452,19" Grid.ColumnSpan="2" Grid.Row="1" Background="{DynamicResource Background}">
-                            <MenuItem Header="主題顏色" ItemsSource="{Binding AccentColors, Mode=OneWay}"
+                            <MenuItem Name="AccentMenu" Header="主題顏色" ItemsSource="{Binding AccentColors, Mode=OneWay}"
                         		ItemContainerStyle="{StaticResource AccentColorMenuItemStyle}" Height="26" />
                         </Menu>
                         <TextBlock x:Name="textBlock_maptype" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="1" TextWrapping="Wrap" Text="地圖類型" VerticalAlignment="Top"/>
-                        <Expander Grid.ColumnSpan="2" Header="編輯專案" Margin="10" Grid.Row="2" IsExpanded="True">
+                        <Expander Grid.ColumnSpan="2" Header="編輯站位" Margin="10" Grid.Row="2" IsExpanded="True">
                             <Grid>
-                                <GplcControls:DeviceEditControl
+                                <GplcControls:DeviceEditControl x:Name="deviceEditControl"
                                     Foreground="{DynamicResource IdealForegroundColorBrush}"
                                     Margin="10" Height="Auto" Width="auto" />
                             </Grid>
