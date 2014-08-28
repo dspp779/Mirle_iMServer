@@ -132,7 +132,14 @@ namespace Mirle_GPLC.Controls
 
         private void refreshDeviceList()
         {
-            deviceList = ModelUtil.getDeviceList();
+            try
+            {
+                deviceList = ModelUtil.getDeviceList();
+            }
+            catch (Exception ex)
+            {
+                deviceList = new List<DeviceData>();
+            }
         }
 
         private void listBox_devices_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -251,17 +258,11 @@ namespace Mirle_GPLC.Controls
             if (float.TryParse(textBox_lat.Text.Trim(), out lat) && textBox_lat.IsFocused)
             {
                 PointLatLng position = new PointLatLng(lat, 0);
-                if (currMarker == null)
-                {
-                    currMarker = new GMapMarker(position);
-                    currMarker.Shape = new ClickMarker(this, currMarker);
-                    Map_SetPosition.Markers.Add(currMarker);
-                }
-                else
+                if (currMarker != null)
                 {
                     position.Lng = currMarker.Position.Lng;
                 }
-                currMarker.Position = position;
+                MarkerPosition = position;
                 Map_SetPosition.Position = position;
             }
         }
@@ -271,17 +272,11 @@ namespace Mirle_GPLC.Controls
             if (float.TryParse(textBox_lng.Text.Trim(), out lng) && textBlock_lng.IsFocused)
             {
                 PointLatLng position = new PointLatLng(0, lng);
-                if (currMarker == null)
-                {
-                    currMarker = new GMapMarker(position);
-                    currMarker.Shape = new ClickMarker(this, currMarker);
-                    Map_SetPosition.Markers.Add(currMarker);
-                }
-                else
+                if (currMarker != null)
                 {
                     position.Lat = currMarker.Position.Lat;
                 }
-                currMarker.Position = position;
+                MarkerPosition = position;
                 Map_SetPosition.Position = position;
             }
         }

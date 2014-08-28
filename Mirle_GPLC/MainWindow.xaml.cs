@@ -482,8 +482,8 @@ namespace Mirle_GPLC
             keyword = reg.Replace(keyword.Trim(), " ");
             return keyword.Split(' ');
         }
-        #endregion 
-        
+        #endregion
+
         /* 位置鎖定縮放
          * 
          * 作法為
