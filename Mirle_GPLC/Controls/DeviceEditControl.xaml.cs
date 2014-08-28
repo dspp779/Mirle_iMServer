@@ -269,7 +269,7 @@ namespace Mirle_GPLC.Controls
 
         private void textBox_lng_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (float.TryParse(textBox_lng.Text.Trim(), out lng) && textBlock_lng.IsFocused)
+            if (float.TryParse(textBox_lng.Text.Trim(), out lng) && textBox_lng.IsFocused)
             {
                 PointLatLng position = new PointLatLng(0, lng);
                 if (currMarker != null)
