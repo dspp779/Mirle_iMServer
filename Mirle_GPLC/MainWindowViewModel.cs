@@ -1,4 +1,6 @@
-﻿using MahApps.Metro;
+﻿using GMap.NET;
+using GMap.NET.MapProviders;
+using MahApps.Metro;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -30,6 +33,7 @@ namespace Mirle_GPLC
             var theme = ThemeManager.DetectAppStyle(Application.Current);
             var accent = ThemeManager.GetAccent(this.Name);
             ThemeManager.ChangeAppStyle(Application.Current, accent, theme.Item1);
+            MainWindow.runningInstance.OnThemeChanged(this);
         }
     }
     
@@ -67,14 +71,40 @@ namespace Mirle_GPLC
                                             .Select(a => new AccentColorMenuData()
                                             { Name = a.Name, ColorBrush = a.Resources["AccentColorBrush"] as Brush })
                                             .ToList();
-
-            BrushResources = FindBrushResources();
+            setting = new GplcSettings(this);
         }
 
         public string Title { get; set; }
         public int SelectedIndex { get; set; }
         public List<AccentColorMenuData> AccentColors { get; set; }
         
+        public GplcSettings setting { get; set;}
+
+        public AccentColorMenuData AccentColor
+        {
+            get { return setting.AccentColor; }
+            set
+            {
+                setting.AccentColor = value;
+            }
+        }
+        public GMapProvider MapProvider
+        {
+            get { return setting.MapProvider; }
+            set
+            {
+                setting.MapProvider = value;
+            }
+        }
+        public AccessMode MapAccessMode
+        {
+            get { return setting.MapAccessMode; }
+            set
+            {
+                setting.MapAccessMode = value;
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
@@ -89,24 +119,6 @@ namespace Mirle_GPLC
             }
         }
         
-        public IEnumerable<string> BrushResources { get; private set; }
-
-        private IEnumerable<string> FindBrushResources()
-        {
-            var rd = new ResourceDictionary
-            {
-                Source = new Uri(@"/MahApps.Metro;component/Styles/Colors.xaml", UriKind.RelativeOrAbsolute)
-            };
-
-            var resources = rd.Keys.Cast<object>()
-                    .Where(key => rd[key] is Brush)
-                    .Select(key => key.ToString())
-                    .OrderBy(s => s)
-                    .ToList();
-
-            return resources;
-        }
-
         public string this[string columnName]
         {
             get
@@ -117,5 +129,30 @@ namespace Mirle_GPLC
 
         public string Error { get { return string.Empty; } }
 
+        // 地圖選項的資料繫結
+        private List<GMapProvider> _mapProviders
+            = new List<GMapProvider> {
+                GoogleMapProvider.Instance,
+                GoogleTerrainMapProvider.Instance,
+                OpenStreetMapProvider.Instance,
+                BingMapProvider.Instance
+            };
+        public List<GMapProvider> GMapProviderList
+        {
+            get { return _mapProviders; }
+        }
+
+
+        // Tag Table的資料來源
+        private ListCollectionView _dataSource;
+        public ListCollectionView DataSource
+        {
+            get { return _dataSource; }
+            set
+            {
+                _dataSource = value;
+                _dataSource.GroupDescriptions.Add(new PropertyGroupDescription("DeviceName"));
+            }
+        }
     }
 }

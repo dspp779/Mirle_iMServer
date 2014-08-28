@@ -16,6 +16,7 @@ namespace Mirle.iMServer.Model.Db
         DbDataReader execQuery(DbCommand cmd);
 
         int execUpdate(DbCommand cmd);
+        int execUpdate(string cmd);
         int execInsert(DbCommand cmd);
 
         int getLastInsertRowId();

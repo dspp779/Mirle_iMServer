@@ -9,11 +9,9 @@
            TargetType="{x:Type ListBox}">
         <Setter Property="Background"
                 Value="Transparent" />
-        <Setter Property="BorderThickness"
-                Value="0" />
+        <Setter Property="BorderThickness" Value="0" />
         <Style.Resources>
             <Style TargetType="{x:Type ListBoxItem}">
-                <Setter Property="MinHeight" Value="50" />
                 <Setter Property="VerticalContentAlignment" Value="Center" />
                 <Setter Property="SnapsToDevicePixels" Value="True" />
                 <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -30,7 +28,7 @@
                                         BorderBrush="{TemplateBinding BorderBrush}"
                                         BorderThickness="1"
                                         SnapsToDevicePixels="True" />
-                                <ContentPresenter Margin="8,5" />
+                                <ContentPresenter Margin="8,5" Content="{Binding DisplayName}" />
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
