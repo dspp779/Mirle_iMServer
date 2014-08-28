@@ -15,11 +15,20 @@
             <RowDefinition/>
             <RowDefinition Height="210"/>
         </Grid.RowDefinitions>
-        <TextBlock x:Name="textBlock_deviceAlias" HorizontalAlignment="Left" Margin="10,39,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Row="1" Height="16" Width="48"><Run Language="zh-tw" Text="站位名稱"/></TextBlock>
-        <TextBox x:Name="textBox_deviceAlias" HorizontalAlignment="Left" Height="26" Margin="79,35,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Grid.Row="1"/>
-        <TextBlock x:Name="textBlock_deviceAddr" HorizontalAlignment="Left" Margin="10,79,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Grid.Row="1" Height="16" Width="48"><Run Language="zh-tw" Text="站位地址"/></TextBlock>
-        <TextBox x:Name="textBox_deviceAddr" HorizontalAlignment="Left" Height="26" Margin="79,75,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Grid.Row="1"/>
-        <GMap:GMapControl Margin="5,10,0,38" Name="Map_SetPosition" MaxZoom="20" MinZoom="3" Grid.RowSpan="2" Grid.Column="1" MouseWheelZoomType="MousePositionWithoutCenter" MouseDoubleClick="Map_SetPosition_MouseDoubleClick"/>
+        <TextBlock x:Name="textBlock_deviceAlias" Height="16" Width="48" Margin="10,39,0,0" TextWrapping="Wrap" 
+                   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="1">
+            <Run Language="zh-tw" Text="站位名稱"/>
+        </TextBlock>
+        <TextBox x:Name="textBox_deviceAlias" Height="26" Width="120" Margin="79,35,0,0" TextWrapping="Wrap"
+                 HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="1"/>
+        <TextBlock x:Name="textBlock_deviceAddr" Height="16" Width="48" Margin="10,79,0,0" TextWrapping="Wrap"
+                   HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="1">
+            <Run Language="zh-tw" Text="站位地址"/>
+        </TextBlock>
+        <TextBox x:Name="textBox_deviceAddr" Height="26" Width="120" Margin="79,75,0,0" TextWrapping="Wrap"
+                 HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Row="1"/>
+        <GMap:GMapControl Margin="5,10,0,38" Name="Map_SetPosition" MaxZoom="20" MinZoom="3" Grid.RowSpan="2" Grid.Column="1"
+                          MouseWheelZoomType="MousePositionWithoutCenter" MouseDoubleClick="Map_SetPosition_MouseDoubleClick"/>
         <Grid HorizontalAlignment="Left" Height="66" Margin="11,106,0,0" VerticalAlignment="Top" Width="189" Grid.Row="1">
             <TextBlock x:Name="textBlock_lng" HorizontalAlignment="Left" Margin="19,9,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="zh-tw" Text="經度"/></TextBlock>
             <TextBox x:Name="textBox_lng" HorizontalAlignment="Left" Height="23" Margin="10,30,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="69" TextChanged="textBox_lng_TextChanged"/>

@@ -1,4 +1,5 @@
-﻿using GMap.NET.MapProviders;
+﻿using GMap.NET;
+using GMap.NET.MapProviders;
 using MahApps.Metro;
 using System;
 using System.Collections.Generic;
@@ -78,6 +79,31 @@ namespace Mirle_GPLC
         public List<AccentColorMenuData> AccentColors { get; set; }
         
         public GplcSettings setting { get; set;}
+
+        public AccentColorMenuData AccentColor
+        {
+            get { return setting.AccentColor; }
+            set
+            {
+                setting.AccentColor = value;
+            }
+        }
+        public GMapProvider MapProvider
+        {
+            get { return setting.MapProvider; }
+            set
+            {
+                setting.MapProvider = value;
+            }
+        }
+        public AccessMode MapAccessMode
+        {
+            get { return setting.MapAccessMode; }
+            set
+            {
+                setting.MapAccessMode = value;
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

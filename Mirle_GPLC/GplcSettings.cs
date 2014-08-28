@@ -1,4 +1,5 @@
-﻿using GMap.NET.MapProviders;
+﻿using GMap.NET;
+using GMap.NET.MapProviders;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +15,10 @@ namespace Mirle_GPLC
         private readonly MainWindowViewModel _viewModel;
 
         private XmlDocument xmlDoc;
+
+        // settings
         private GMapProvider mapProvider;
+        private AccessMode mapAccessMode;
         private AccentColorMenuData accentColor;
 
         private static string AppDataPath =
@@ -29,8 +33,16 @@ namespace Mirle_GPLC
             set
             {
                 mapProvider = value;
-                xmlDoc.SelectSingleNode("Settings/Map/MapProvider").InnerText = mapProvider.Name;
-                xmlDoc.Save(fileName);
+                writeSetting("Settings/Map/MapProvider", mapProvider.Name);
+            }
+        }
+        public AccessMode MapAccessMode
+        {
+            get { return mapAccessMode; }
+            set
+            {
+                mapAccessMode = value;
+                writeSetting("Settings/Map/AccessMode", mapAccessMode.ToString());
             }
         }
         public AccentColorMenuData AccentColor
@@ -39,8 +51,7 @@ namespace Mirle_GPLC
             set
             {
                 accentColor = value;
-                xmlDoc.SelectSingleNode("Settings/Theme/Accent").InnerText = accentColor.Name;
-                xmlDoc.Save(fileName);
+                writeSetting("Settings/Theme/Accent", accentColor.Name);
             }
         }
 
@@ -50,25 +61,27 @@ namespace Mirle_GPLC
 
             mapProvider = _viewModel.GMapProviderList[0];
             accentColor = _viewModel.AccentColors[0];
+            mapAccessMode = AccessMode.ServerOnly;
 
             fileName = Path.Combine(AppDataPath, SettingFileName);
-            // read xml file
-            xmlDoc = new XmlDocument();
 
             if (!Directory.Exists(AppDataPath))
             {
                 Directory.CreateDirectory(AppDataPath);
             }
             if (!File.Exists(fileName))
-                {
+            {
                 try
                 {
                     newSetting();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                 }
             }
+
+            // read xml file
+            xmlDoc = new XmlDocument();
             xmlDoc.Load(fileName);
 
             loadMapSettings();
@@ -77,29 +90,28 @@ namespace Mirle_GPLC
 
         private void newSetting()
         {
-            using (XmlWriter writer = XmlWriter.Create(fileName))
-            {
-                writer.WriteStartDocument();
-                writer.WriteStartElement("Settings");
+            xmlDoc = new XmlDocument();
 
-                writer.WriteStartElement("Map");
-                writer.WriteStartElement("MapProvider");
-                writer.WriteString(mapProvider.Name);
-                writer.WriteEndElement();
-                writer.WriteEndElement();
+            XmlElement setting = xmlDoc.CreateElement("Settings");
+            xmlDoc.AppendChild(setting);
 
-                writer.WriteStartElement("Theme");
-                writer.WriteStartElement("Accent");
-                writer.WriteString(accentColor.Name);
-                writer.WriteEndElement();
-                writer.WriteEndElement();
+            XmlElement map = xmlDoc.CreateElement("Map");
+            setting.AppendChild(map);
+            XmlElement provider = xmlDoc.CreateElement("MapProvider");
+            map.AppendChild(provider);
+            XmlElement accessMode = xmlDoc.CreateElement("AccessMode");
+            map.AppendChild(accessMode);
 
-                writer.WriteEndElement();
-                writer.WriteEndDocument();
+            XmlElement theme = xmlDoc.CreateElement("Theme");
+            setting.AppendChild(theme);
+            XmlElement accent = xmlDoc.CreateElement("Accent");
+            theme.AppendChild(accent);
 
+            provider.InnerText = mapProvider.Name;
+            accessMode.InnerText = mapAccessMode.ToString();
+            accent.InnerText = accentColor.Name;
 
-                xmlDoc.Save(writer);
-            }
+            xmlDoc.Save(fileName);
         }
 
         private void loadMapSettings()
@@ -116,10 +128,13 @@ namespace Mirle_GPLC
                         break;
                     }
                 }
+                string accessModeName = xmlDoc.SelectSingleNode("Settings/Map/AccessMode").InnerText;
+                mapAccessMode = (AccessMode)Enum.Parse(typeof(AccessMode), accessModeName);
             }
             catch (Exception)
             {
                 mapProvider = GMapProviders.GoogleMap;
+                mapAccessMode = AccessMode.ServerOnly;
             }
         }
 
@@ -139,6 +154,22 @@ namespace Mirle_GPLC
             }
             catch (Exception)
             {
+                accentColor = _viewModel.AccentColors[0];
+            }
+        }
+
+        private void writeSetting(string node, string innerText)
+        {
+            try
+            {
+                xmlDoc.SelectSingleNode(node).InnerText = innerText;
+                xmlDoc.Save(fileName);
+            }
+            catch (Exception)
+            {
+                newSetting();
+                xmlDoc.SelectSingleNode(node).InnerText = innerText;
+                xmlDoc.Save(fileName);
             }
         }
     }

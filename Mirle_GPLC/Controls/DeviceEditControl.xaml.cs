@@ -113,7 +113,7 @@ namespace Mirle_GPLC.Controls
         {
             listBox_devices.UnselectAll();
             // 設定地圖來源
-            Map_SetPosition.MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
+            //Map_SetPosition.MapProvider = MainWindow.currentSetting.MapProvider;
             // 設定初始檢視大小
             Map_SetPosition.Zoom = 8;
             // 關閉顯示中心紅十字

@@ -26,6 +26,8 @@ namespace Mirle_GPLC
     public partial class MainWindow : MetroWindow
     {
         public static MainWindow runningInstance;
+        public static GplcSettings currentSetting;
+
         private readonly MainWindowViewModel _viewModel;
 
         // project data
@@ -73,6 +75,9 @@ namespace Mirle_GPLC
             _viewModel = new MainWindowViewModel();
             DataContext = _viewModel;
 
+            // 初始化現在設定
+            MainWindow.currentSetting = _viewModel.setting;
+
             InitializeComponent();
 
             // 初始化 Tag Table，使用空 Tag data
@@ -94,11 +99,15 @@ namespace Mirle_GPLC
             // 設定語言
             GMap.NET.MapProviders.GMapProvider.Language = GMap.NET.LanguageType.ChineseTraditional;
             // 設定圖塊取得機制: ServerOnly, ServerAndCache, CacheOnly.
-            GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerAndCache;
+            GMap.NET.GMaps.Instance.Mode = _viewModel.MapAccessMode;
 
             // 設定地圖來源
             //gMap.MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
-            gMap.MapProvider = _viewModel.setting.MapProvider;
+            gMap.MapProvider = deviceEditControl.Map_SetPosition.MapProvider
+                = _viewModel.MapProvider;
+            //Binding mapProviderBinding = new Binding();
+            //mapProviderBinding.Source = _viewModel.MapProvider;
+            //BindingOperations.SetBinding(gMap.MapProvider, , mapProviderBinding;
             // 設定初始檢視大小
             gMap.Zoom = 8;
             // 關閉顯示中心紅十字
@@ -523,8 +532,8 @@ namespace Mirle_GPLC
 
         private void gMap_OnMapTypeChanged(GMapProvider type)
         {
+            deviceEditControl.Map_SetPosition.MapProvider = type;
             _viewModel.setting.MapProvider = type;
-
         }
 
         private void ChangeTheme(AccentColorMenuData accentColor)
