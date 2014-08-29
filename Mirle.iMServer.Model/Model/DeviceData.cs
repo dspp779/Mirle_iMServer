@@ -108,7 +108,7 @@ namespace Mirle.iMServer.Model
 
         public bool Contains(string[] keywords)
         {
-            string str = String.Concat(deviceName);
+            string str = String.Concat(alias, deviceName);
             foreach (string keyword in keywords)
             {
                 // comparison ignore case
