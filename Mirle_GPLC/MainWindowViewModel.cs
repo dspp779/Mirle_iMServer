@@ -104,6 +104,14 @@ namespace Mirle_GPLC
                 setting.MapAccessMode = value;
             }
         }
+        public int PollingRate
+        {
+            get { return setting.PollingRate; }
+            set
+            {
+                setting.PollingRate = value;
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

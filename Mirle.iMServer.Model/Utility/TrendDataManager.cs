@@ -18,7 +18,7 @@ namespace Mirle.iMServer.Model.Utility
      * */
     public class TrendDataManager
     {
-        public static int pollingRate;
+        private static int pollingRate;
 
         // 監測值資料快取
         private static Dictionary<string, Dictionary<string, double?>> instantValueDictionary
@@ -45,10 +45,16 @@ namespace Mirle.iMServer.Model.Utility
         {
             // polling rate
             pollingRate = 1000;
-            
+
             // initialize tag value refresh worker
             TagValRefreshWorker.WorkerSupportsCancellation = true;
             TagValRefreshWorker.DoWork += new DoWorkEventHandler(TagValRefreshWorker_DoWork);
+        }
+
+        public TrendDataManager(int pollingRate)
+        {
+            // polling rate
+            TrendDataManager.pollingRate = pollingRate;
         }
 
         private static void TagValRefreshWorker_DoWork(object sender, DoWorkEventArgs e)

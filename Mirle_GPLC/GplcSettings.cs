@@ -20,6 +20,7 @@ namespace Mirle_GPLC
         private GMapProvider mapProvider;
         private AccessMode mapAccessMode;
         private AccentColorMenuData accentColor;
+        private int pollingRate;
 
         // setting file path
         private static string AppDataPath =
@@ -55,6 +56,15 @@ namespace Mirle_GPLC
                 writeSetting("Settings/Theme/Accent", accentColor.Name);
             }
         }
+        public int PollingRate
+        {
+            get { return pollingRate; }
+            set
+            {
+                pollingRate = value;
+                writeSetting("Settings/PollingRate", pollingRate.ToString());
+            }
+        }
 
         public GplcSettings(MainWindowViewModel viewModel)
         {
@@ -63,6 +73,7 @@ namespace Mirle_GPLC
             mapProvider = _viewModel.GMapProviderList[0];
             accentColor = _viewModel.AccentColors[0];
             mapAccessMode = AccessMode.ServerOnly;
+            pollingRate = 1000;
 
             fileName = Path.Combine(AppDataPath, SettingFileName);
 
@@ -72,21 +83,9 @@ namespace Mirle_GPLC
             }
             if (!File.Exists(fileName))
             {
-                try
-                {
-                    newSetting();
-                }
-                catch (Exception ex)
-                {
-                }
+                newSetting();
             }
-
-            // read xml file
-            xmlDoc = new XmlDocument();
-            xmlDoc.Load(fileName);
-
-            loadMapSettings();
-            loadThemeSettings();
+            loadSettings();
         }
 
         private void newSetting()
@@ -108,55 +107,72 @@ namespace Mirle_GPLC
             XmlElement accent = xmlDoc.CreateElement("Accent");
             theme.AppendChild(accent);
 
+            XmlElement polling = xmlDoc.CreateElement("PollingRate");
+            setting.AppendChild(polling);
+
             provider.InnerText = mapProvider.Name;
             accessMode.InnerText = mapAccessMode.ToString();
             accent.InnerText = accentColor.Name;
+            polling.InnerText = pollingRate.ToString();
 
             xmlDoc.Save(fileName);
+        }
+
+        private void loadSettings()
+        {
+            try
+            {
+                // read xml file
+                xmlDoc = new XmlDocument();
+                xmlDoc.Load(fileName);
+
+                loadMapSettings();
+                loadThemeSettings();
+                loadPollingSetting();
+            }
+            catch (Exception)
+            {
+                newSetting();
+                mapProvider = GMapProviders.GoogleMap;
+                mapAccessMode = AccessMode.ServerAndCache;
+                accentColor = _viewModel.AccentColors[0];
+                pollingRate = 1000;
+            }
         }
 
         private void loadMapSettings()
         {
             // load map setting
-            try
+            string providerName = xmlDoc.SelectSingleNode("Settings/Map/MapProvider").InnerText;
+            foreach (GMapProvider provider in _viewModel.GMapProviderList)
             {
-                string providerName = xmlDoc.SelectSingleNode("Settings/Map/MapProvider").InnerText;
-                foreach (GMapProvider provider in _viewModel.GMapProviderList)
+                if (provider.Name.Equals(providerName))
                 {
-                    if (provider.Name.Equals(providerName))
-                    {
-                        mapProvider = provider;
-                        break;
-                    }
+                    mapProvider = provider;
+                    break;
                 }
-                string accessModeName = xmlDoc.SelectSingleNode("Settings/Map/AccessMode").InnerText;
-                mapAccessMode = (AccessMode)Enum.Parse(typeof(AccessMode), accessModeName);
             }
-            catch (Exception)
-            {
-                mapProvider = GMapProviders.GoogleMap;
-                mapAccessMode = AccessMode.ServerOnly;
-            }
+            string accessModeName = xmlDoc.SelectSingleNode("Settings/Map/AccessMode").InnerText;
+            mapAccessMode = (AccessMode)Enum.Parse(typeof(AccessMode), accessModeName);
         }
 
         private void loadThemeSettings()
         {
             // load theme setting
-            try
+            string accent = xmlDoc.SelectSingleNode("Settings/Theme/Accent").InnerText;
+            foreach (AccentColorMenuData a in _viewModel.AccentColors)
             {
-                string accent = xmlDoc.SelectSingleNode("Settings/Theme/Accent").InnerText;
-                foreach (AccentColorMenuData a in _viewModel.AccentColors)
+                if (a.Name.Equals(accent))
                 {
-                    if (a.Name.Equals(accent))
-                    {
-                        accentColor = a;
-                    }
+                    accentColor = a;
                 }
             }
-            catch (Exception)
-            {
-                accentColor = _viewModel.AccentColors[0];
-            }
+        }
+
+        private void loadPollingSetting()
+        {
+            string pRate = xmlDoc.SelectSingleNode("Settings/PollingRate").InnerText;
+            pollingRate = int.Parse(pRate);
         }
 
         private void writeSetting(string node, string innerText)
