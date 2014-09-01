@@ -87,19 +87,18 @@ namespace Mirle.iMServer.Model
 
         public void apply(DeviceData device)
         {
-            set(device.id, device.alias, device.deviceName, device.addr, device.lat, device.lng);
+            set(device.id, device.alias, device.addr, device.lat, device.lng);
         }
 
         public void apply(Int64 id, DeviceData device)
         {
-            set(id, device.alias, device.deviceName, device.addr, device.lat, device.lng);
+            set(id, device.alias, device.addr, device.lat, device.lng);
         }
 
-        private void set(Int64 id, string alias, string deviceName, string addr, double lat, double lng)
+        private void set(Int64 id, string alias, string addr, double lat, double lng)
         {
             this._id = id;
             this._alias = alias;
-            this._deviceName = deviceName;
             this._addr = addr;
             this._lat = lat;
             this._lng = lng;

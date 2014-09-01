@@ -21,6 +21,7 @@ namespace Mirle_GPLC
         private AccessMode mapAccessMode;
         private AccentColorMenuData accentColor;
 
+        // setting file path
         private static string AppDataPath =
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Mirle_GPLC";
         private static string SettingFileName = "settings.xml";
