@@ -5,6 +5,7 @@ using Mirle_GPLC.CustomeMarkers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +26,6 @@ namespace Mirle_GPLC.Controls
     /// </summary>
     public partial class DeviceEditControl : UserControl
     {
-        private MainWindow mainWindow;
         private float lat, lng;
         private List<DeviceData> deviceList;
 
@@ -47,13 +47,15 @@ namespace Mirle_GPLC.Controls
             get { return _device; }
             set
             {
-                if (value != null )
+                if (value != null)
                 {
                     _device = value;
+                    button_edit.IsEnabled = true;
                 }
                 else
                 {
                     _device = DeviceData.Empty;
+                    button_edit.IsEnabled = false;
                 }
                 // 更新 textbox 的值
                 textBlock_deviceName.Text = _device.deviceName;
@@ -125,11 +127,6 @@ namespace Mirle_GPLC.Controls
             textBox_lng.Text = textBox_lat.Text = "";
         }
 
-        public void init(MainWindow mainWindow)
-        {
-            this.mainWindow = mainWindow;
-        }
-
         private void refreshDeviceList()
         {
             try
@@ -155,17 +152,17 @@ namespace Mirle_GPLC.Controls
                 string addr = textBox_deviceAddr.Text.Trim();
                 float.TryParse(textBox_lng.Text.Trim(), out lng);
                 float.TryParse(textBox_lat.Text.Trim(), out lat);
+
+                Debug.Assert(!String.IsNullOrWhiteSpace(Device.deviceName));
+
                 DeviceData device =
                     new DeviceData(Device.id, alias, Device.deviceName, addr, lat, lng);
                 insertUpdate(device);
+                MainWindow.runningInstance.refreshData();
             }
             catch (Exception ex)
             {
-                mainWindow.messageDialog("編輯站位發生錯誤", ex.Message);
-            }
-            finally
-            {
-                MainWindow.runningInstance.refreshData();
+                MainWindow.runningInstance.messageDialog("編輯站位發生錯誤", ex.Message);
             }
         }
 

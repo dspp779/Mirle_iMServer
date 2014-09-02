@@ -263,11 +263,16 @@ namespace Mirle_GPLC
 
             if (_shutdown)
             {
-                // 將 Trend data worker 關閉
-                // (非必要，關閉應用程式會自動關閉背景工作)
-                TrendDataManager.cancelDeviceTagRefresh();
-                Application.Current.Shutdown();
+                Exit();
             }
+        }
+
+        private void Exit()
+        {
+            // 將 Trend data worker 關閉
+            // (非必要，關閉應用程式會自動關閉背景工作)
+            TrendDataManager.cancelDeviceTagRefresh();
+            Application.Current.Shutdown();
         }
 
         // 專案選項變更事件處理
@@ -310,6 +315,7 @@ namespace Mirle_GPLC
                 CurrentMarker = null;
                 //projectListView.UnselectAll();
             }
+            new TrendDataManager(_viewModel.PollingRate);
         }
 
         #endregion
