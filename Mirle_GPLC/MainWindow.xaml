@@ -54,8 +54,8 @@
 
     <Controls:MetroWindow.Flyouts>
         <Controls:FlyoutsControl>
-            <Controls:Flyout Name="projectFlyout" Header="ProjectView" Position="Right"
-                             IsModal="False" MinWidth="300" Width="300" Theme="Adapt" IsOpenChanged="projectFlyout_IsOpenChanged">
+            <Controls:Flyout x:Name="deviceFlyout" Header="ProjectView" Position="Right"
+                             IsModal="False" MinWidth="300" Width="300" Theme="Adapt" IsOpenChanged="deviceFlyout_IsOpenChanged">
 
                 <Grid Margin="10,-15,10,10">
                     <Grid.RowDefinitions>
@@ -64,11 +64,11 @@
                         <RowDefinition Height="45"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock Name="textBlock_projectAddr" Margin="55,0,10,0" TextWrapping="Wrap" Text="projectAddress" VerticalAlignment="Top" FontSize="14" Height="19"/>
+                    <TextBlock x:Name="textBlock_deviceAddr" Margin="55,0,10,0" TextWrapping="Wrap" Text="projectAddress" VerticalAlignment="Top" FontSize="14" Height="19"/>
 
                     <DataGrid CanUserAddRows="False" AutoGenerateColumns="False"
                               BorderBrush="Black" BorderThickness="1"
-                              Name="projectTagTable" Margin="10,10" Grid.Row="1" ColumnWidth="*"
+                              x:Name="deviceTagTable" Margin="10,10" Grid.Row="1" ColumnWidth="*"
                               HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
                               ItemsSource="{Binding DataSource}" HorizontalScrollBarVisibility="Hidden">
                         <DataGrid.GroupStyle>
@@ -142,13 +142,13 @@
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="1058*" />
             </Grid.ColumnDefinitions>
-            <ListBox HorizontalAlignment="Left" Margin="0,36,0,0" Name="projectListView" Width="200" FontSize="16" Grid.Row="1" PreviewMouseDown="projectListView_PreviewMouseDown" SelectionChanged="projectListView_SelectionChanged"/>
+            <ListBox HorizontalAlignment="Left" Margin="0,36,0,0" x:Name="deviceListView" Width="200" FontSize="16" Grid.Row="1" PreviewMouseDown="deviceListView_PreviewMouseDown" SelectionChanged="deviceListView_SelectionChanged"/>
             <Controls:Planerator HorizontalAlignment="Left" Margin="1395,-19,-643,0" Name="planerator1" VerticalAlignment="Top" Grid.Column="1" Height="0" Width="0" />
             <Controls:MetroAnimatedTabControl Name="tabControl_main" Grid.Column="1" Grid.RowSpan="2" Background="{DynamicResource Background}">
                 <TabItem Header="地圖瀏覽" Name="tabItem_map">
                     <Grid>
                         <GMap:GMapControl Margin="0,0,0,0" Name="gMap" MaxZoom="20" MinZoom="3" MouseWheelZoomType="MousePositionWithoutCenter" OnMapTypeChanged="gMap_OnMapTypeChanged" />
-                        <GplcControls:DeviceSimpleView x:Name="projectSimpleView" HorizontalAlignment="Right" Width="232" Margin="0,130,10,160" />
+                        <GplcControls:DeviceSimpleView x:Name="deviceSimpleView" HorizontalAlignment="Right" Width="232" Margin="0,130,10,160" />
                     </Grid>
                 </TabItem>
                 <TabItem Header="設定" Name="setting">
@@ -185,9 +185,9 @@
                     </Grid>
                 </TabItem>
             </Controls:MetroAnimatedTabControl>
-            <TextBox Height="26" Name="textBox_searchProject" VerticalAlignment="Top" Controls:TextboxHelper.Watermark="搜尋專案..."
+            <TextBox Height="26" Name="textBox_searchDevice" VerticalAlignment="Top" Controls:TextboxHelper.Watermark="搜尋專案..."
                          Controls:TextboxHelper.ClearTextButton="True"
-                         Controls:TextboxHelper.ButtonCommand="{Binding TextBoxButtonCmd, Mode=OneWay}" Margin="10,5,10,0" TextChanged="textBox_searchProject_TextChanged" Grid.Row="1">
+                         Controls:TextboxHelper.ButtonCommand="{Binding TextBoxButtonCmd, Mode=OneWay}" Margin="10,5,10,0" TextChanged="textBox_searchDevice_TextChanged" Grid.Row="1">
                 <TextBox.Style>
                     <Style TargetType="{x:Type TextBox}"
                                BasedOn="{StaticResource SearchMetroTextBox}">

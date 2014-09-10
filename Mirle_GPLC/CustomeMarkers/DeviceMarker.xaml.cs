@@ -23,30 +23,30 @@ namespace Mirle_GPLC.CustomeMarkers
     /// <summary>
     /// MarkerHollow.xaml 的互動邏輯
     /// </summary>
-    public partial class ProjectMarker
+    public partial class DeviceMarker
     {
         // marker image uri
-        private static string markerHollowPath = "pack://application:,,,/Mirle_GPLC;component/CustomeMarkers/ProjectMarkerHollow.png";
-        private static string markerFillPath = "pack://application:,,,/Mirle_GPLC;component/CustomeMarkers/ProjectMarkerFill.png";
+        private static string markerHollowPath = "pack://application:,,,/Mirle_GPLC;component/CustomeMarkers/DeviceMarkerHollow.png";
+        private static string markerFillPath = "pack://application:,,,/Mirle_GPLC;component/CustomeMarkers/DeviceMarkerFill.png";
 
         Popup Popup;
         GMapMarker Marker;
         MainWindow mainWindow;
         
-        public DeviceData Project;
+        public DeviceData Device;
         bool selected;
 
         public string name
         {
-            get { return Project.alias; }
+            get { return Device.alias; }
         }
         public double lat
         {
-            get { return Project.lat; }
+            get { return Device.lat; }
         }
         public double lng
         {
-            get { return Project.lng; }
+            get { return Device.lng; }
         }
         public bool IsSelected
         {
@@ -68,25 +68,25 @@ namespace Mirle_GPLC.CustomeMarkers
         }
         
 
-        public ProjectMarker(MainWindow mainWindow , GMapMarker marker, DeviceData project)
+        public DeviceMarker(MainWindow mainWindow , GMapMarker marker, DeviceData device)
         {
             InitializeComponent();
 
             this.mainWindow = mainWindow;
             this.Marker = marker;
-            this.Project = project;
+            this.Device = device;
             selected = false;
 
-            initProjectMarkerPopup();
+            initDeviceMarkerPopup();
         }
 
-        private void initProjectMarkerPopup()
+        private void initDeviceMarkerPopup()
         {
             Popup = new Popup();
             Popup.Placement = PlacementMode.Mouse;
         }
 
-        void PojectMarker_Loaded(object sender, RoutedEventArgs e)
+        void DeviceMarker_Loaded(object sender, RoutedEventArgs e)
         {
             if (icon.Source.CanFreeze)
             {
@@ -94,21 +94,21 @@ namespace Mirle_GPLC.CustomeMarkers
             }
         }
 
-        void ProjectMarker_SizeChanged(object sender, SizeChangedEventArgs e)
+        void DeviceMarker_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             Marker.Offset = new Point(-e.NewSize.Width / 2, -e.NewSize.Height / 2);
         }
 
-        void ProjectMarker_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        void DeviceMarker_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
         }
 
-        void ProjectMarker_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        void DeviceMarker_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            mainWindow.projectMarkerClicked(this);
+            mainWindow.deviceMarkerClicked(this);
         }
 
-        void ProjectMarker_MouseLeave(object sender, MouseEventArgs e)
+        void DeviceMarker_MouseLeave(object sender, MouseEventArgs e)
         {
             if(!selected)
                 icon.Source = new BitmapImage(new Uri(markerHollowPath));
@@ -117,12 +117,12 @@ namespace Mirle_GPLC.CustomeMarkers
             Popup.Child = null;
         }
 
-        void ProjectMarker_MouseEnter(object sender, MouseEventArgs e)
+        void DeviceMarker_MouseEnter(object sender, MouseEventArgs e)
         {
             icon.Source = new BitmapImage(new Uri(markerFillPath));
             Marker.ZIndex += 100000;
             DeviceMarkerTooltip tooltip = new DeviceMarkerTooltip();
-            tooltip.SetValues(Project);
+            tooltip.SetValues(Device);
             Popup.Child = tooltip;
             Popup.IsOpen = true;
         }
@@ -144,21 +144,21 @@ namespace Mirle_GPLC.CustomeMarkers
          * 算出新的中心點像素位置：當前標記點的像素位置+位移量
          * 算出中心點經緯座標：FromPixelToLatLng
          */
-        private void ProjectMarker_MouseWheel(object sender, MouseWheelEventArgs e)
+        private void DeviceMarker_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            PointLatLng projectPosition = new PointLatLng(Project.lat, Project.lng);
+            PointLatLng projectPosition = new PointLatLng(Device.lat, Device.lng);
             // hover position locking zoom
             mainWindow.positionLockZoom(mainWindow.gMap, projectPosition, (e.Delta > 0) ? 1 : -1);
         }
 
         public override string ToString()
         {
-            return Project.ToString();
+            return Device.ToString();
         }
 
-        private void ProjectMarker_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void DeviceMarker_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            PointLatLng projectPosition = new PointLatLng(Project.lat, Project.lng);
+            PointLatLng projectPosition = new PointLatLng(Device.lat, Device.lng);
             // hover position locking zoom
             mainWindow.positionLockZoom(mainWindow.gMap, projectPosition, 1);
         }

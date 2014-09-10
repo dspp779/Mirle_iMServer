@@ -37,7 +37,7 @@ namespace Mirle_GPLC.Controls
         public void init(MainWindow mainWindow)
         {
             this.mainWindow = mainWindow;
-            this.projectTagTable.LostMouseCapture += (sender, e) => { this.isDragging = false; };
+            this.deviceTagTable.LostMouseCapture += (sender, e) => { this.isDragging = false; };
         }
 
         public void set(DeviceData d)
@@ -61,7 +61,7 @@ namespace Mirle_GPLC.Controls
 
         private void button_expand_Click(object sender, RoutedEventArgs e)
         {
-            mainWindow.initProjectDataViewFlyout(device);
+            mainWindow.initDeviceDataViewFlyout(device);
         }
 
         private void DeviceSimpleView_MouseMove(object sender, MouseEventArgs e)

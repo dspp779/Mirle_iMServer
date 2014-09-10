@@ -11,9 +11,12 @@ using System.Data;
 
 namespace Mirle.iMServer.Model.Db
 {
+    /// <summary>
+    /// MySQL 資料庫操作執行介面
+    /// </summary>
     public class MySqlDbInterface : DbInterface
     {
-        // default db data source
+        // 預設資料庫來源資訊
         public static string server = "localhost";
         public static string userid = "root";
         public static string password = " ";
@@ -21,6 +24,7 @@ namespace Mirle.iMServer.Model.Db
         public static string charset = "utf8";
         public static bool persistSecurityInfo = true;
 
+        // 資料庫來源字串
         public string DataSource
         {
             get
@@ -97,5 +101,26 @@ namespace Mirle.iMServer.Model.Db
             execUpdate(cmd);
             return getLastInsertRowId();
         }
+
+        /* execute an query SQL command such as SELECT
+         * return data in DataTable
+         * */
+        public DataTable getDataTable(DbCommand cmd)
+        {
+            DataTable dt = new DataTable();
+
+            using (MySqlConnection conn = getConnection() as MySqlConnection)
+            {
+                conn.Open();
+                cmd.Connection = conn;
+
+                using (DbDataAdapter adp = new MySqlDataAdapter(cmd as MySqlCommand))
+                {
+                    adp.Fill(dt);
+                }
+            }
+            return dt;
+        }
+
     }
 }

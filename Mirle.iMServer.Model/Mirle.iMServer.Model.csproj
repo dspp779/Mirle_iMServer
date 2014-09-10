@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Db\DbInterface.cs" />
     <Compile Include="Db\MySqlDbInterface.cs" />
+    <Compile Include="Model\AbstractData.cs" />
     <Compile Include="Model\DeviceData.cs" />
     <Compile Include="Model\TagData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

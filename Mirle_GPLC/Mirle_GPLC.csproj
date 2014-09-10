@@ -143,7 +143,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="CustomeMarkers\ProjectMarker.xaml">
+    <Page Include="CustomeMarkers\DeviceMarker.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -167,8 +167,8 @@
     <Compile Include="CustomeMarkers\ClickMarker.xaml.cs">
       <DependentUpon>ClickMarker.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CustomeMarkers\ProjectMarker.xaml.cs">
-      <DependentUpon>ProjectMarker.xaml</DependentUpon>
+    <Compile Include="CustomeMarkers\DeviceMarker.xaml.cs">
+      <DependentUpon>DeviceMarker.xaml</DependentUpon>
     </Compile>
     <Compile Include="GplcSettings.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -346,7 +346,7 @@
     <Resource Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="CustomeMarkers\ProjectMarkerHollow.png" />
+    <Resource Include="CustomeMarkers\DeviceMarkerHollow.png" />
     <Resource Include="Mirle.logo.ico" />
     <Resource Include="Resources\Entypo-license.txt" />
     <Resource Include="Resources\WindowsIcons-license.txt" />
@@ -375,7 +375,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="CustomeMarkers\ProjectMarkerFill.png" />
+    <Resource Include="CustomeMarkers\DeviceMarkerFill.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="CustomeMarkers\ClickMarker.png" />

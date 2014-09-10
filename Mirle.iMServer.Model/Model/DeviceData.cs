@@ -6,11 +6,20 @@ using System.Text;
 
 namespace Mirle.iMServer.Model
 {
-    public class DeviceData : IEquatable<DeviceData>, INotifyPropertyChanged
+    /// <summary>
+    /// 站位資料類別
+    /// 此類別包含站位的詳細資訊：
+    /// id: 獨一無二識別ID，已設定資訊之站位才有
+    /// alias" 站位別名，方便識讀的站位名稱(可為中文)
+    /// deviceNam" 站位名稱(不可為中文)
+    /// addr: 站位所在地址
+    /// lat: 站位的地理緯度
+    /// lng: 站位的地理經度
+    /// tags: 站位的點位
+    /// </summary>
+    public class DeviceData : AbstractData
     {
         public static DeviceData Empty = new DeviceData();
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         protected long _id;
         protected string _alias;
@@ -20,7 +29,7 @@ namespace Mirle.iMServer.Model
         protected double _lng;
         protected List<TagData> _tags;
 
-        public Int64 id
+        public Int64 ID
         {
             get { return _id; }
         }
@@ -48,6 +57,7 @@ namespace Mirle.iMServer.Model
         {
             get
             {
+                // 檢查站位之點位資訊是否載入
                 if (_tags == null)
                 {
                     reload();
@@ -56,11 +66,13 @@ namespace Mirle.iMServer.Model
             }
         }
 
+        // 站位的顯示名稱
         public string DisplayName
         {
             get { return ToString(); }
         }
 
+        #region -- Constructors --
         public DeviceData()
         {
             _lat = _lng = _id = 0;
@@ -84,28 +96,35 @@ namespace Mirle.iMServer.Model
             this._lat = lat;
             this._lng = lng;
         }
+        #endregion
 
+        #region -- 站位的資料設定 --
         public void apply(DeviceData device)
         {
-            set(device.id, device.alias, device.addr, device.lat, device.lng);
+            set(device.ID, device.alias, device.deviceName, device.addr, device.lat, device.lng);
         }
 
         public void apply(Int64 id, DeviceData device)
         {
-            set(id, device.alias, device.addr, device.lat, device.lng);
+            set(id, device.alias, device.deviceName, device.addr, device.lat, device.lng);
         }
 
-        private void set(Int64 id, string alias, string addr, double lat, double lng)
+        private void set(Int64 id, string alias, string deviceName, string addr, double lat, double lng)
         {
             this._id = id;
             this._alias = alias;
+            this._deviceName = deviceName;
             this._addr = addr;
             this._lat = lat;
             this._lng = lng;
             NotifyValueChanged("DisplayName");
         }
+        #endregion
 
-        public bool Contains(string[] keywords)
+        /* 改寫搜尋包含關鍵字之方法
+         * 此方法比對任一包含之關鍵字
+         * */
+        public override bool Contains(string[] keywords)
         {
             string str = String.Concat(alias, deviceName);
             foreach (string keyword in keywords)
@@ -119,26 +138,37 @@ namespace Mirle.iMServer.Model
             return false;
         }
 
-        private static bool Contains(string source, string toCheck, StringComparison comp)
-        {
-            return source.IndexOf(toCheck, comp) >= 0;
-        }
-
+        // 改寫取得雜湊碼之方法
         public override int GetHashCode()
         {
-            return _deviceName.GetHashCode() ;
+            return _deviceName.GetHashCode();
         }
 
+        // 改寫相等判定方法
         public override bool Equals(object obj)
         {
             return obj is DeviceData && Equals((DeviceData)obj);
         }
-
+        public override bool Equals(AbstractData data)
+        {
+            return data is DeviceData && Equals((DeviceData)data);
+        }
         public bool Equals(DeviceData d)
         {
             return d._deviceName == _deviceName;
         }
 
+        // 改寫大小比較方法
+        public override int CompareTo(object obj)
+        {
+            return (obj is DeviceData) ? CompareTo((DeviceData)obj) : 0;
+        }
+        public int CompareTo(DeviceData data)
+        {
+            return _deviceName.CompareTo(data._deviceName);
+        }
+
+        // 改寫 ToString 方法
         public override string ToString()
         {
             if (alias != null && alias.Length > 0)
@@ -151,17 +181,11 @@ namespace Mirle.iMServer.Model
             }
         }
 
+        // 站位之點位資料更新方法
         public void reload()
         {
             _tags = ModelUtil.getTagList(this);
         }
 
-        public void NotifyValueChanged(string property)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(property));
-            }
-        }
     }
 }

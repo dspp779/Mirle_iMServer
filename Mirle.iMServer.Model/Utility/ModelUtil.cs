@@ -7,11 +7,19 @@ using Mirle.iMServer.Model;
 using System.Data.Common;
 using Mirle.iMServer.Model.Db;
 using System.Data;
+using Mirle.iMServer.Model.Utility;
 
 namespace Mirle.iMServer.Model
 {
+    /// <summary>
+    /// 資料公用方法類別
+    /// 此類別包含站位、點位資料庫讀取、更新方法
+    /// </summary>
     public class ModelUtil
     {
+        private static Dictionary<string, DeviceData> deviceDictionary
+            = new Dictionary<string, DeviceData>();
+
         #region -- get device list --
         public static List<DeviceData> getMapDeviceList()
         {
@@ -105,12 +113,13 @@ namespace Mirle.iMServer.Model
                 {
                     while (reader.Read())
                     {
-                        // get column values
-                        dList.Add(
-                            new DeviceData(reader.GetInt64("id"), reader.GetString("alias"),
+                        DeviceData device = new DeviceData(reader.GetInt64("id"), reader.GetString("alias"),
                                 reader.GetString("deviceName"), reader.GetString("addr"),
-                                reader.GetDouble("lat"), reader.GetDouble("lng"))
-                        );
+                                reader.GetDouble("lat"), reader.GetDouble("lng"));
+                        // insert or modify
+                        deviceDictionary[device.deviceName] = device;
+                        // get column values
+                        dList.Add(device);
                     }
                 }
             }
@@ -145,18 +154,53 @@ namespace Mirle.iMServer.Model
             }
             return tList;
         }
-        public static void getTagList(MySqlCommand cmd, DeviceData device, List<TagData> dList)
+        public static void getTagList(MySqlCommand cmd, DeviceData device, List<TagData> tList)
         {
             using (MySqlDataReader reader = cmd.ExecuteReader())
             {
                 while (reader.Read())
                 {
                     // get column values
-                    dList.Add(
+                    tList.Add(
                         new TagData(reader.GetInt64("id"), reader.GetString("table"), reader.GetString("name"),
                             reader.GetString("logid"), reader.GetString("log"), reader.GetString("tag"),
                             reader.GetString("tag_memo"), reader.GetInt32("io_addr"), device)
                     );
+                }
+            }
+        }
+        public static List<TagData> getTagList(List<long> tagIdList)
+        {
+            List<TagData> tList = new List<TagData>();
+            MySqlDbInterface db = new MySqlDbInterface();
+            using (DbConnection conn = db.getConnection())
+            {
+                conn.Open();
+                MySqlCommand cmd = new MySqlCommand();
+                StringBuilder cmdstr = new StringBuilder("SELECT * FROM loginfo WHERE FALSE");
+                for (int i = 0; i < tagIdList.Count; i++)
+                {
+                    cmdstr.AppendFormat(" OR id = @tagid{0}", i);
+                    cmd.Parameters.AddWithValue("@tagid" + i, tagIdList[i]);
+                }
+                cmd.CommandText = cmdstr.ToString();
+                cmd.Connection = conn as MySqlConnection;
+                getTagList(cmd, tList);
+            }
+            return tList;
+        }
+        public static void getTagList(MySqlCommand cmd, List<TagData> tList)
+        {
+            using (MySqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    DeviceData device = deviceDictionary[reader.GetString("device")];
+                    TagData tag = new TagData(reader.GetInt64("id"), reader.GetString("table"), reader.GetString("name"),
+                            reader.GetString("logid"), reader.GetString("log"), reader.GetString("tag"),
+                            reader.GetString("tag_memo"), reader.GetInt32("io_addr"), device);
+                    // get column values
+                    tList.Add(tag);
                 }
             }
         }
@@ -188,7 +232,7 @@ namespace Mirle.iMServer.Model
                 + " WHERE id=@id;";
 
             MySqlCommand cmd = new MySqlCommand(updateCommand);
-            cmd.Parameters.AddWithValue("@id", device.id);
+            cmd.Parameters.AddWithValue("@id", device.ID);
             cmd.Parameters.AddWithValue("@alias", device.alias);
             cmd.Parameters.AddWithValue("@addr", device.addr);
             cmd.Parameters.AddWithValue("@lat", device.lat);
@@ -211,5 +255,6 @@ namespace Mirle.iMServer.Model
             db.execUpdate(cmd);
         }
         #endregion
+
     }
 }

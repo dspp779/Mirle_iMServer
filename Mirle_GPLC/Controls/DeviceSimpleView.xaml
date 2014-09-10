@@ -27,7 +27,7 @@
 
         <DataGrid CanUserAddRows="False" AutoGenerateColumns="False"
                   BorderBrush="Black" BorderThickness="1"
-                  Name="projectTagTable" Margin="10,10" Grid.Row="1" ColumnWidth="*"
+                  x:Name="deviceTagTable" Margin="10,10" Grid.Row="1" ColumnWidth="*"
                   HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
                   ItemsSource="{Binding DataSource}" HorizontalScrollBarVisibility="Hidden">
             <DataGrid.GroupStyle>
