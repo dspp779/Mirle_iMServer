@@ -10,25 +10,35 @@ using System.Xml;
 
 namespace Mirle_GPLC
 {
+    /// <summary>
+    /// 地理資訊系統設定類別
+    /// </summary>
     public class GplcSettings
     {
-        private readonly MainWindowViewModel _viewModel;
+        // 預設設定檔儲存位置
+        private static string AppDataPath =
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Mirle_GPLC";
+        // 預設設定檔名稱
+        private static string SettingFileName = "settings.xml";
 
+        // MainWindow 的 model 物件
+        private readonly MainWindowViewModel _viewModel;
+        // 目前設定
+        public static GplcSettings setting;
+
+        // xml 文件
         private XmlDocument xmlDoc;
 
-        // settings
+        // 設定檔名稱
+        private string fileName;
+
+        // 設定項目
         private GMapProvider mapProvider;
         private AccessMode mapAccessMode;
         private AccentColorMenuData accentColor;
         private int pollingRate;
 
-        // setting file path
-        private static string AppDataPath =
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Mirle_GPLC";
-        private static string SettingFileName = "settings.xml";
-        private string fileName;
-
-
+        // 設定項目屬性
         public GMapProvider MapProvider
         {
             get { return mapProvider; }
@@ -66,28 +76,35 @@ namespace Mirle_GPLC
             }
         }
 
+        // constructor
         public GplcSettings(MainWindowViewModel viewModel)
         {
             _viewModel = viewModel;
 
+            // 預設設定值
             mapProvider = _viewModel.GMapProviderList[0];
             accentColor = _viewModel.AccentColors[0];
             mapAccessMode = AccessMode.ServerOnly;
             pollingRate = 1000;
 
+            // 完整檔案設定檔路徑
             fileName = Path.Combine(AppDataPath, SettingFileName);
 
+            // 檢查資料夾是否存在
             if (!Directory.Exists(AppDataPath))
             {
                 Directory.CreateDirectory(AppDataPath);
             }
+            // 檢查檔案是否存在
             if (!File.Exists(fileName))
             {
                 newSetting();
             }
+            // 載入設定
             loadSettings();
         }
 
+        // 新預設設定檔
         private void newSetting()
         {
             xmlDoc = new XmlDocument();
@@ -118,6 +135,7 @@ namespace Mirle_GPLC
             xmlDoc.Save(fileName);
         }
 
+        #region -- 載入設定 --
         private void loadSettings()
         {
             try
@@ -126,12 +144,14 @@ namespace Mirle_GPLC
                 xmlDoc = new XmlDocument();
                 xmlDoc.Load(fileName);
 
+                // 載入設定
                 loadMapSettings();
                 loadThemeSettings();
                 loadPollingSetting();
             }
             catch (Exception)
             {
+                // 預設設定
                 newSetting();
                 mapProvider = GMapProviders.GoogleMap;
                 mapAccessMode = AccessMode.ServerAndCache;
@@ -174,7 +194,9 @@ namespace Mirle_GPLC
             string pRate = xmlDoc.SelectSingleNode("Settings/PollingRate").InnerText;
             pollingRate = int.Parse(pRate);
         }
+        #endregion
 
+        // 寫入設定檔
         private void writeSetting(string node, string innerText)
         {
             try

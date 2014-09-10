@@ -14,7 +14,6 @@ namespace Mirle.iMServer.Model.Utility
 {
     /* TrendDataManager is responsible for Tag monitoring value refreshing.
      * It maintains a Dictionary (or Hashtable) of trend history (trend table in database))
-     * 
      * */
     public class TrendDataManager
     {
@@ -24,20 +23,24 @@ namespace Mirle.iMServer.Model.Utility
         private static Dictionary<string, Dictionary<string, double?>> instantValueDictionary
             = new Dictionary<string, Dictionary<string, double?>>();
 
+        // 監測值更新背景工作執行序
         private static BackgroundWorker TagValRefreshWorker = new BackgroundWorker();
 
+        // 監測值最後更新時間
         private static DateTime _lastRefreshTime;
         public static DateTime lastRefreshTime
         {
             get { return _lastRefreshTime; }
         }
 
-        // data needed for refresh worker
+        // 需更新資料之tag
         private static List<TagData> tagsToRefresh;
+        // 目前的趨勢資料表名稱
         private static string trendTableName;
+        // 目前趨勢資料之查詢Dictionary
         private static Dictionary<string, double?> trendTable = null;
 
-        // data lock for worker data
+        // 資料更新資訊同步的資料鎖
         private static object workerDataLock = new object();
 
         // initialize trend data manager
@@ -46,7 +49,7 @@ namespace Mirle.iMServer.Model.Utility
             // polling rate
             pollingRate = 1000;
 
-            // initialize tag value refresh worker
+            // 初始化監測值更新背景工作執行序
             TagValRefreshWorker.WorkerSupportsCancellation = true;
             TagValRefreshWorker.DoWork += new DoWorkEventHandler(TagValRefreshWorker_DoWork);
         }
@@ -57,6 +60,7 @@ namespace Mirle.iMServer.Model.Utility
             TrendDataManager.pollingRate = pollingRate;
         }
 
+        // 監測值更新背景工作
         private static void TagValRefreshWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             // 監測資料定期更新
@@ -134,26 +138,41 @@ namespace Mirle.iMServer.Model.Utility
             return value;
         }
 
+        /// <summary>
+        /// refresh the newest values of specific trend table
+        /// </summary>
+        /// <param name="table">trend table to refresh</param>
+        /// <param name="trendTable">the newest value of the trend table</param>
         private static void refreshRowVal(string table, Dictionary<string, double?> trendTable)
         {
             MySqlDbInterface db = new MySqlDbInterface();
             using (DbConnection conn = db.getConnection())
             {
                 conn.Open();
-                // get the newest row
+                // get the newest row in the trend table
                 string cmdstr = string.Format("SELECT * FROM {0} ORDER BY datetime DESC LIMIT 1", table);
                 MySqlCommand cmd = new MySqlCommand(cmdstr);
-                //cmd.Parameters.AddWithValue("@table", tag.table);
                 cmd.Connection = conn as MySqlConnection;
+
                 using (MySqlDataReader reader = cmd.ExecuteReader())
                 {
+                    /* get schema table of the trend table
+                     * so that we can get schema information
+                     * */
                     DataTable schemaTable = reader.GetSchemaTable();
+
+                    // read the first row of trend table
                     if (reader.Read())
                     {
+                        /* traverse all columns of trend table by 
+                         * traversing the rows of schema table
+                         * */
                         foreach (DataRow row in schemaTable.Rows)
                         {
+                            // column name
                             string columnName = row[schemaTable.Columns[0]].ToString();
                             double? value = null;
+                            // try get float value
                             try
                             {
                                 value = reader.GetFloat(columnName);
@@ -162,21 +181,15 @@ namespace Mirle.iMServer.Model.Utility
                             {
                                 value = null;
                             }
-                            // add or update
+                            // add or update the trend table dictionary
                             trendTable[columnName] = value;
                         }
+                        // refresh last refresh time
                         _lastRefreshTime = reader.GetDateTime("datetime");
                     }
                 }
             }
         }
 
-        private static void refreshAllCacheTagVal()
-        {
-            foreach (KeyValuePair<string, Dictionary<string, double?>> table in instantValueDictionary)
-            {
-                refreshRowVal(table.Key, table.Value);
-            }
-        }
     }
 }

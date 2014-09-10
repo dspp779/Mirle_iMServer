@@ -7,11 +7,22 @@ using System.Text;
 
 namespace Mirle.iMServer.Model
 {
-    public class TagData : INotifyPropertyChanged
+    /// <summary>
+    /// 點位資料類別
+    /// 此類別包含點位的詳細資料
+    /// id: 點位在資料庫的識別碼
+    /// table: 點位歷史監測資料所在的資料表
+    /// name: 點位所屬的趨勢表名
+    /// log_id: 點位在歷史資料表的欄位名稱
+    /// log_name: 點位的別名
+    /// tag: 點位的Tag名
+    /// tag_memo: 點位備註
+    /// io_addr: 點位的IO位址
+    /// device: 點位所屬的Device
+    /// </summary>
+    public class TagData : AbstractData
     {
         public static TagData Empty = new TagData();
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         private long _id;
         private string _table;
@@ -59,10 +70,21 @@ namespace Mirle.iMServer.Model
         {
             get { return _device; }
         }
+
+        // 點位所屬站位的名稱
         public string DeviceName
         {
-            get { return _device.deviceName; }
+            get { return _device.ToString(); }
         }
+        // 點位包含站位的全名
+        public string FullName
+        {
+            get
+            {
+                return this + @" @ " + DeviceName;
+            }
+        }
+        // 點位目前監測值
         public string Value
         {
             get
@@ -71,9 +93,10 @@ namespace Mirle.iMServer.Model
             }
         }
 
+        #region -- Constructors --
         public TagData()
         {
-            _id = _io_addr = 0;
+            _id = _io_addr = -1;
             _table = _name = _log_id = _log_name = _tag = _tag_memo = "";
             _device = DeviceData.Empty;
         }
@@ -91,11 +114,14 @@ namespace Mirle.iMServer.Model
             this._io_addr = io_addr;
             this._device = device;
         }
+        #endregion
 
         /* check if tag satisfy keyword rule
          * note: AND rule is used int this method
+         * 點位搜尋的檢查方法
+         * 注意！此方法比對點位是否包含所有關鍵字
          * */
-        public bool Contains(string[] keywords)
+        public override bool Contains(string[] keywords)
         {
             foreach (string keyword in keywords)
             {
@@ -107,24 +133,43 @@ namespace Mirle.iMServer.Model
             return true;
         }
 
-        private static bool Contains(string source, string toCheck, StringComparison comp)
+        // 改寫取得雜湊碼之方法
+        public override int GetHashCode()
         {
-            return source.IndexOf(toCheck, comp) >= 0;
+            return _id.GetHashCode();
         }
 
+        // 改寫相等判定方法
+        public override bool Equals(object obj)
+        {
+            return obj is TagData && Equals((TagData)obj);
+        }
+        public override bool Equals(AbstractData data)
+        {
+            return data is TagData && Equals((TagData)data);
+        }
+        public bool Equals(TagData t)
+        {
+            return _id == t._id;
+        }
+
+        // 改寫大小比較方法
+        public override int CompareTo(object obj)
+        {
+            return (obj is TagData) ? CompareTo((TagData)obj) : 0;
+        }
+        public int CompareTo(TagData data)
+        {
+            return _id.CompareTo(data._id);
+        }
+
+        // 改寫 ToString 方法
         public override string ToString()
         {
             return _log_name;
         }
 
-        public void NotifyValueChanged()
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs("Value"));
-            }
-        }
-
+        // 取得最新點位監測值
         private float? getNumericVal()
         {
             if (this.Equals(TagData.Empty))
@@ -133,7 +178,7 @@ namespace Mirle.iMServer.Model
             return f != null ? f : null;
         }
 
-        // get tag value and return in text format
+        // 取得最新點位監測值，並以字串形式回傳
         private string getTextVal()
         {
             if (this.Equals(TagData.Empty))
@@ -141,5 +186,12 @@ namespace Mirle.iMServer.Model
             float? f = (float?)TrendDataManager.getTagVal(this);
             return f != null ? f.ToString() : "null";
         }
+
+        // 通知內容變更方法
+        public void NotifyValueChanged()
+        {
+            base.NotifyValueChanged("Value");
+        }
+
     }
 }

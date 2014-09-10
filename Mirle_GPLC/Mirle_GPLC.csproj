@@ -169,9 +169,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="CustomeMarkers\ProjectMarker.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="CustomeMarkers\DeviceMarker.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -193,8 +193,8 @@
     <Compile Include="CustomeMarkers\ClickMarker.xaml.cs">
       <DependentUpon>ClickMarker.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CustomeMarkers\ProjectMarker.xaml.cs">
-      <DependentUpon>ProjectMarker.xaml</DependentUpon>
+    <Compile Include="CustomeMarkers\DeviceMarker.xaml.cs">
+      <DependentUpon>DeviceMarker.xaml</DependentUpon>
     </Compile>
     <Compile Include="GplcSettings.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -372,7 +372,6 @@
     <Resource Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="CustomeMarkers\ProjectMarkerHollow.png" />
     <Resource Include="Mirle.logo.ico" />
     <Resource Include="Resources\Entypo-license.txt" />
     <Resource Include="Resources\WindowsIcons-license.txt" />
@@ -401,10 +400,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="CustomeMarkers\ProjectMarkerFill.png" />
+    <Resource Include="CustomeMarkers\ClickMarker.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="CustomeMarkers\ClickMarker.png" />
+    <Resource Include="CustomeMarkers\DeviceMarkerFill.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="CustomeMarkers\DeviceMarkerHollow.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

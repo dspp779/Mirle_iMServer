@@ -47,7 +47,7 @@ namespace Mirle_GPLC.Controls
             get { return _device; }
             set
             {
-                if (value != null)
+                if (value != null )
                 {
                     _device = value;
                     button_edit.IsEnabled = true;
@@ -62,7 +62,7 @@ namespace Mirle_GPLC.Controls
                 textBox_deviceAlias.Text = _device.alias;
                 textBox_deviceAddr.Text = _device.addr;
                 // 更新地圖選取位置與縮放，id > 0 代表已設定位置
-                if (_device.id > 0)
+                if (_device.ID > 0)
                 {
                     textBox_lng.Text = _device.lng.ToString();
                     textBox_lat.Text = _device.lat.ToString();
@@ -90,16 +90,22 @@ namespace Mirle_GPLC.Controls
             {
                 if (currMarker == null)
                 {
+                    // 新增 marker
                     currMarker = new GMapMarker(value);
+                    // 設定 shape 為 click marker
                     currMarker.Shape = new ClickMarker(this, currMarker);
+                    // 將 marker 加入地圖
                     Map_SetPosition.Markers.Add(currMarker);
                 }
+                // 設定 marker 的位置
                 currMarker.Position = value;
             }
         }
         public DeviceEditControl()
         {
             InitializeComponent();
+
+            // 設定 Control 的資料繫結物件
             DataContext = this;
 
             // load device list
@@ -133,14 +139,16 @@ namespace Mirle_GPLC.Controls
             {
                 deviceList = ModelUtil.getDeviceList();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
+                // 錯誤發生
                 deviceList = new List<DeviceData>();
             }
         }
 
         private void listBox_devices_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            // 設定目前站位
             Device = listBox_devices.SelectedItem as DeviceData;
         }
 
@@ -148,6 +156,7 @@ namespace Mirle_GPLC.Controls
         {
             try
             {
+                // 分析 輸入資料
                 string alias = textBox_deviceAlias.Text.Trim();
                 string addr = textBox_deviceAddr.Text.Trim();
                 float.TryParse(textBox_lng.Text.Trim(), out lng);
@@ -155,21 +164,28 @@ namespace Mirle_GPLC.Controls
 
                 Debug.Assert(!String.IsNullOrWhiteSpace(Device.deviceName));
 
+                // 新增站位物件包含輸入的資訊
                 DeviceData device =
-                    new DeviceData(Device.id, alias, Device.deviceName, addr, lat, lng);
+                    new DeviceData(Device.ID, alias, Device.deviceName, addr, lat, lng);
+
+                // 插入 或 更新 站位資訊
                 insertUpdate(device);
-                MainWindow.runningInstance.refreshData();
             }
             catch (Exception ex)
             {
                 MainWindow.runningInstance.messageDialog("編輯站位發生錯誤", ex.Message);
+            }
+            finally
+            {
+                // 更新 MainWindow
+                MainWindow.runningInstance.refreshData();
             }
         }
 
         private void insertUpdate(DeviceData device)
         {
             // update
-            if (device.id > 0)
+            if (device.ID > 0)
             {
                 ModelUtil.updateDervice(device);
                 // apply to viewing content
@@ -242,7 +258,7 @@ namespace Mirle_GPLC.Controls
             }
         }
 
-        #region -- textbox latlng --
+        #region -- textbox latlng refreshing --
 
         private void refreshLatlngTextBox()
         {
@@ -254,6 +270,7 @@ namespace Mirle_GPLC.Controls
         {
             if (float.TryParse(textBox_lat.Text.Trim(), out lat) && textBox_lat.IsFocused)
             {
+                // 更新 marker 緯度
                 PointLatLng position = new PointLatLng(lat, 0);
                 if (currMarker != null)
                 {
@@ -268,6 +285,7 @@ namespace Mirle_GPLC.Controls
         {
             if (float.TryParse(textBox_lng.Text.Trim(), out lng) && textBox_lng.IsFocused)
             {
+                // 更新 marker 經度
                 PointLatLng position = new PointLatLng(0, lng);
                 if (currMarker != null)
                 {

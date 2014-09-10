@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="Mirle_GPLC.CustomeMarkers.DeviceMarker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="48" d:DesignWidth="48" SizeChanged="DeviceMarker_SizeChanged"
+             MouseWheel="DeviceMarker_MouseWheel" Loaded="DeviceMarker_Loaded"
+             MouseLeave="DeviceMarker_MouseLeave" MouseEnter="DeviceMarker_MouseEnter"
+             MouseLeftButtonDown="DeviceMarker_MouseLeftButtonDown" MouseLeftButtonUp="DeviceMarker_MouseLeftButtonUp"
+             MouseDoubleClick="DeviceMarker_MouseDoubleClick">
+    <Grid>
+        <Image Name="icon" Source="pack://application:,,,/Mirle_GPLC;component/CustomeMarkers/DeviceMarkerHollow.png" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.9" />
+    </Grid>
+</UserControl>
