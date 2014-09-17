@@ -62,7 +62,7 @@ namespace Mirle_GPLC.Controls
                 textBox_deviceAlias.Text = _device.alias;
                 textBox_deviceAddr.Text = _device.addr;
                 // 更新地圖選取位置與縮放，id > 0 代表已設定位置
-                if (_device.ID > 0)
+                if (!string.IsNullOrWhiteSpace(_device.alias))
                 {
                     textBox_lng.Text = _device.lng.ToString();
                     textBox_lat.Text = _device.lat.ToString();
@@ -166,7 +166,7 @@ namespace Mirle_GPLC.Controls
 
                 // 新增站位物件包含輸入的資訊
                 DeviceData device =
-                    new DeviceData(Device.ID, alias, Device.deviceName, addr, lat, lng);
+                    new DeviceData(alias, Device.deviceName, addr, lat, lng);
 
                 // 插入 或 更新 站位資訊
                 insertUpdate(device);
@@ -185,7 +185,7 @@ namespace Mirle_GPLC.Controls
         private void insertUpdate(DeviceData device)
         {
             // update
-            if (device.ID > 0)
+            if (!string.IsNullOrWhiteSpace(_device.alias))
             {
                 ModelUtil.updateDervice(device);
                 // apply to viewing content
@@ -194,7 +194,7 @@ namespace Mirle_GPLC.Controls
             // insert
             else
             {
-                int id = ModelUtil.insertDervice(device);
+                int id = ModelUtil.insertUpdateDervice(device);
                 // apply to viewing content
                 Device.apply(id, device);
             }

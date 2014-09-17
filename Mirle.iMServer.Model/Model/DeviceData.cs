@@ -21,18 +21,13 @@ namespace Mirle.iMServer.Model
     {
         public static DeviceData Empty = new DeviceData();
 
-        protected long _id;
         protected string _alias;
         protected string _deviceName;
         protected string _addr;
         protected double _lat;
         protected double _lng;
-        protected List<TagData> _tags;
+        protected Dictionary<string, TagData> _tags;
 
-        public Int64 ID
-        {
-            get { return _id; }
-        }
         public string alias
         {
             get { return _alias; }
@@ -53,13 +48,20 @@ namespace Mirle.iMServer.Model
         {
             get { return _lng; }
         }
-        public List<TagData> tags
+        public List<TagData> TagList
         {
             get
             {
-                // 檢查站位之點位資訊是否載入
+                return Tags.Values.ToList();
+            }
+        }
+        public Dictionary<string, TagData> Tags
+        {
+            get
+            {
                 if (_tags == null)
                 {
+                    _tags = new Dictionary<string, TagData>();
                     reload();
                 }
                 return _tags;
@@ -75,21 +77,20 @@ namespace Mirle.iMServer.Model
         #region -- Constructors --
         public DeviceData()
         {
-            _lat = _lng = _id = 0;
+            _lat = _lng = 0;
             _alias = _deviceName = _addr = "";
-            _tags = new List<TagData> { TagData.Empty };
+            Tags[TagData.Empty.log_id] = TagData.Empty;
         }
 
         public DeviceData(string deviceName)
         {
-            _lat = _lng = _id = 0;
+            _lat = _lng = 0;
             _alias = _addr = "";
             _deviceName = deviceName;
         }
 
-        public DeviceData(Int64 id, string alias, string deviceName, string addr, double lat, double lng)
+        public DeviceData(string alias, string deviceName, string addr, double lat, double lng)
         {
-            this._id = id;
             this._alias = alias;
             this._deviceName = deviceName;
             this._addr = addr;
@@ -101,17 +102,16 @@ namespace Mirle.iMServer.Model
         #region -- 站位的資料設定 --
         public void apply(DeviceData device)
         {
-            set(device.ID, device.alias, device.deviceName, device.addr, device.lat, device.lng);
+            set(device.alias, device.deviceName, device.addr, device.lat, device.lng);
         }
 
         public void apply(Int64 id, DeviceData device)
         {
-            set(id, device.alias, device.deviceName, device.addr, device.lat, device.lng);
+            set(device.alias, device.deviceName, device.addr, device.lat, device.lng);
         }
 
-        private void set(Int64 id, string alias, string deviceName, string addr, double lat, double lng)
+        private void set(string alias, string deviceName, string addr, double lat, double lng)
         {
-            this._id = id;
             this._alias = alias;
             this._deviceName = deviceName;
             this._addr = addr;
@@ -137,7 +137,7 @@ namespace Mirle.iMServer.Model
             }
             return false;
         }
-
+        
         // 改寫取得雜湊碼之方法
         public override int GetHashCode()
         {
@@ -184,7 +184,10 @@ namespace Mirle.iMServer.Model
         // 站位之點位資料更新方法
         public void reload()
         {
-            _tags = ModelUtil.getTagList(this);
+            foreach (TagData tag in ModelUtil.getTagList(this))
+            {
+                Tags[tag.log_id] = tag;
+            }
         }
 
     }

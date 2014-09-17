@@ -98,7 +98,7 @@ namespace Mirle.iMServer.Model
         {
             _id = _io_addr = -1;
             _table = _name = _log_id = _log_name = _tag = _tag_memo = "";
-            _device = DeviceData.Empty;
+            _device = null;
         }
 
         public TagData(long id, string table, string name, string log_id, string log_name,

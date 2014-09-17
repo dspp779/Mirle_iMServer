@@ -45,7 +45,7 @@ namespace Mirle_GPLC.Controls
             this.device = d;
             textBlock_projectName.Text = device.alias;
             device.reload();
-            TrendDataManager.registerDeviceTagRefresh(device.tags);
+            TrendDataManager.registerDeviceTagRefresh(device.TagList);
         }
 
         private void textBox_searchTag_TextChanged(object sender, TextChangedEventArgs e)

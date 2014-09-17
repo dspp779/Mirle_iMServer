@@ -16,7 +16,7 @@ namespace Mirle_GPLC.Controls
         public void SetValues(DeviceData device)
         {
             textBlock_DeviceName.Text = device.ToString();
-            textBlock_TagNum.Text = device.tags.Count.ToString();
+            textBlock_TagNum.Text = device.TagList.Count.ToString();
         }
     }
 }
