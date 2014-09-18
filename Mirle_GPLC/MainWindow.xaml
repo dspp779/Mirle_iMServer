@@ -1,12 +1,13 @@
 ﻿<Controls:MetroWindow
+    x:Name="GWindow"
     x:Class="Mirle_GPLC.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-    xmlns:Mirle_GPLC="clr-namespace:Mirle_GPLC"
     xmlns:Dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
     xmlns:GMap="clr-namespace:GMap.NET.WindowsPresentation;assembly=GMap.NET.WindowsPresentation"
-    xmlns:GplcControls="clr-namespace:Mirle_GPLC.Controls"
+    xmlns:Mirle_GPLC="clr-namespace:Mirle_GPLC"
+    xmlns:local="clr-namespace:Mirle_GPLC.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:System="clr-namespace:System;assembly=mscorlib"
@@ -144,14 +145,14 @@
             </Grid.ColumnDefinitions>
             <ListBox HorizontalAlignment="Left" Margin="0,36,0,0" x:Name="deviceListView" Width="200" FontSize="16" Grid.Row="1" PreviewMouseDown="deviceListView_PreviewMouseDown" SelectionChanged="deviceListView_SelectionChanged"/>
             <Controls:Planerator HorizontalAlignment="Left" Margin="1395,-19,-643,0" Name="planerator1" VerticalAlignment="Top" Grid.Column="1" Height="0" Width="0" />
-            <Controls:MetroAnimatedTabControl Name="tabControl_main" Grid.Column="1" Grid.RowSpan="2" Background="{DynamicResource Background}">
-                <TabItem Header="地圖瀏覽" Name="tabItem_map">
+            <Controls:MetroAnimatedTabControl Name="tabControl_main" Grid.Column="1" Grid.RowSpan="2" Background="{DynamicResource Background}" SelectionChanged="tabControl_main_SelectionChanged">
+                <TabItem x:Name="tabItem_map" Header="地圖瀏覽">
                     <Grid>
                         <GMap:GMapControl Margin="0,0,0,0" Name="gMap" MaxZoom="20" MinZoom="3" MouseWheelZoomType="MousePositionWithoutCenter" OnMapTypeChanged="gMap_OnMapTypeChanged" />
-                        <GplcControls:DeviceSimpleView x:Name="deviceSimpleView" HorizontalAlignment="Right" Width="232" Margin="0,130,10,160" />
+                        <local:DeviceSimpleView x:Name="deviceSimpleView" HorizontalAlignment="Right" Width="232" Margin="0,130,10,160" />
                     </Grid>
                 </TabItem>
-                <TabItem Header="設定" Name="setting">
+                <TabItem x:Name="tabItem_setting" Header="設定">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="10" />
@@ -177,9 +178,8 @@
                         <TextBlock x:Name="textBlock_maptype" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="1" TextWrapping="Wrap" Text="地圖類型" VerticalAlignment="Top"/>
                         <Expander Grid.ColumnSpan="2" Header="編輯站位" Margin="10" Grid.Row="2" IsExpanded="True">
                             <Grid>
-                                <GplcControls:DeviceEditControl x:Name="deviceEditControl"
-                                    Foreground="{DynamicResource IdealForegroundColorBrush}"
-                                    Margin="10" Height="Auto" Width="auto" />
+                                <local:DeviceEditControl x:Name="deviceEdit" Margin="10" Height="Auto" Width="auto"
+                                                         Foreground="{DynamicResource IdealForegroundColorBrush}" />
                             </Grid>
                         </Expander>
                     </Grid>

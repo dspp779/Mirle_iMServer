@@ -24,6 +24,11 @@ namespace Mirle.iMServer.Model
     {
         public static TagData Empty = new TagData();
 
+        static TagData()
+        {
+            Empty._device = DeviceData.Empty;
+        }
+
         private long _id;
         private string _table;
         private string _name;
@@ -84,6 +89,22 @@ namespace Mirle.iMServer.Model
                 return this + @" @ " + DeviceName;
             }
         }
+        // 點位在資料庫獨一無二名稱格式
+        public string DbName
+        {
+            get
+            {
+                return string.Format("`{0}`", UniqueName);
+            }
+        }
+        // 點位獨一無二的名稱
+        public string UniqueName
+        {
+            get
+            {
+                return string.Format("{0}@{1}({2})", LogName, DeviceName, log_id);
+            }
+        }
         // 點位目前監測值
         public string Value
         {
@@ -98,7 +119,6 @@ namespace Mirle.iMServer.Model
         {
             _id = _io_addr = -1;
             _table = _name = _log_id = _log_name = _tag = _tag_memo = "";
-            _device = DeviceData.Empty;
         }
 
         public TagData(long id, string table, string name, string log_id, string log_name,

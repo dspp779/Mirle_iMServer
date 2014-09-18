@@ -113,7 +113,7 @@ namespace Mirle.iMServer.Model
                 {
                     while (reader.Read())
                     {
-                        DeviceData device = new DeviceData(reader.GetInt64("id"), reader.GetString("alias"),
+                        DeviceData device = new DeviceData(reader.GetString("alias"),
                                 reader.GetString("deviceName"), reader.GetString("addr"),
                                 reader.GetDouble("lat"), reader.GetDouble("lng"));
                         // insert or modify
@@ -207,12 +207,13 @@ namespace Mirle.iMServer.Model
         #endregion
 
         #region -- device update methods --
-        public static int insertDervice(DeviceData device)
+        public static int insertUpdateDervice(DeviceData device)
         {
             MySqlDbInterface db = new MySqlDbInterface();
             string insertCommand =
                 @"INSERT INTO Device(alias,addr,lat,lng,deviceName)"
-                + " VALUES (@alias,@addr,@lat,@lng,@deviceName);";
+                + " VALUES (@alias,@addr,@lat,@lng,@deviceName)"
+                + " ON DUPLICATE KEY UPDATE alias=@alias,addr=@addr,lat=@lat,lng=@lng";
 
             MySqlCommand cmd = new MySqlCommand(insertCommand);
             cmd.Parameters.AddWithValue("@alias", device.alias);
@@ -227,12 +228,11 @@ namespace Mirle.iMServer.Model
         public static int updateDervice(DeviceData device)
         {
             MySqlDbInterface db = new MySqlDbInterface();
-            string updateCommand = @"UPDATE Device SET alias=@alias,"
-                + "addr=@addr,lat=@lat,lng=@lng,deviceName=@deviceName"
-                + " WHERE id=@id;";
+            string updateCommand =
+                @"UPDATE Device SET alias=@alias,addr=@addr,lat=@lat,lng=@lng"
+                + " WHERE deviceName=@deviceName;";
 
             MySqlCommand cmd = new MySqlCommand(updateCommand);
-            cmd.Parameters.AddWithValue("@id", device.ID);
             cmd.Parameters.AddWithValue("@alias", device.alias);
             cmd.Parameters.AddWithValue("@addr", device.addr);
             cmd.Parameters.AddWithValue("@lat", device.lat);
@@ -249,9 +249,8 @@ namespace Mirle.iMServer.Model
             MySqlDbInterface db = new MySqlDbInterface();
             string cmd =
                 "CREATE TABLE IF NOT EXISTS device"
-                + "(id bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY, "
-                + "alias text, addr text, lat double, lng double, "
-                + "deviceName varchar(64) NOT NULL) DEFAULT CHARSET=utf8";
+                + "(deviceName varchar(64) NOT NULL PRIMARY KEY, "
+                + "alias text, addr text, lat double, lng double) DEFAULT CHARSET=utf8";
             db.execUpdate(cmd);
         }
         #endregion

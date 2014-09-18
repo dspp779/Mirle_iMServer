@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <ProjectView>ShowAllFiles</ProjectView>
-    <PublishUrlHistory>C:\Users\user\Downloads\gplc140820\</PublishUrlHistory>
+    <PublishUrlHistory />
     <InstallUrlHistory />
     <SupportUrlHistory />
     <UpdateUrlHistory />

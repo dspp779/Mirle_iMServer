@@ -111,7 +111,7 @@ namespace Mirle_GPLC
 
             // 設定地圖來源
             //gMap.MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
-            gMap.MapProvider = deviceEditControl.Map_SetPosition.MapProvider
+            gMap.MapProvider = deviceEdit.Map_SetPosition.MapProvider
                 = _viewModel.MapProvider;
             //Binding mapProviderBinding = new Binding();
             //mapProviderBinding.Source = _viewModel.MapProvider;
@@ -155,6 +155,7 @@ namespace Mirle_GPLC
             }
             catch (Exception ex)
             {
+                this.deviceList = new List<DeviceData>();
                 messageDialog("發生錯誤", "載入站位資料時發生錯誤\n" + ex.Message);
             }
         }
@@ -178,7 +179,7 @@ namespace Mirle_GPLC
             }
         }
 
-        #region -- Tab Table 新增、修改方法 --
+        #region -- Tag Table 新增、修改方法 --
         private void TagTableAdd(List<TagData> tags)
         {
             //新增多個Tag至Tag Table
@@ -370,39 +371,53 @@ namespace Mirle_GPLC
         // 開啟站位內容瀏覽 simple view
         public void initDeviceSimpleView(DeviceData device)
         {
-            // 關閉flyout
-            deviceFlyout.IsOpen = false;
+            try
+            {
+                // 關閉flyout
+                deviceFlyout.IsOpen = false;
 
-            // 設定 simple view 之 device
-            deviceSimpleView.set(device);
+                // 設定 simple view 之 device
+                deviceSimpleView.set(device);
 
-            // 更新站位 Tag Table 內容
-            initDeviceTagTable(device);
+                // 更新站位 Tag Table 內容
+                initDeviceTagTable(device);
 
-            // 重置 Tag Table scroll 為頂端
-            dataGridScrollToTop(deviceSimpleView.deviceTagTable);
-            //開啟 simple view
-            deviceSimpleView.Visibility = Visibility.Visible;
+                // 重置 Tag Table scroll 為頂端
+                dataGridScrollToTop(deviceSimpleView.deviceTagTable);
+                //開啟 simple view
+                deviceSimpleView.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                messageDialog("讀取站位內容發生錯誤", ex.Message);
+            }
         }
 
         // 開啟站位內容瀏覽 flyout
         public void initDeviceDataViewFlyout(DeviceData device)
         {
-            // 隱藏 simple view
-            deviceSimpleView.Visibility = Visibility.Hidden;
+            try
+            {
+                // 隱藏 simple view
+                deviceSimpleView.Visibility = Visibility.Hidden;
 
-            // 初始化站位內容瀏覽畫面
-            deviceFlyout.Header = device.alias;
-            textBlock_deviceAddr.Text = device.addr;
-            textBox_searchTag.Text = "";
+                // 初始化站位內容瀏覽畫面
+                deviceFlyout.Header = device.alias;
+                textBlock_deviceAddr.Text = device.addr;
+                textBox_searchTag.Text = "";
 
-            // 更新站位 Tag Table 內容
-            initDeviceTagTable(device);
+                // 更新站位 Tag Table 內容
+                initDeviceTagTable(device);
 
-            // 重置 Tag Table scroll 為頂端
-            dataGridScrollToTop(deviceTagTable);
-            // 開啟Flyout
-            deviceFlyout.IsOpen = true;
+                // 重置 Tag Table scroll 為頂端
+                dataGridScrollToTop(deviceTagTable);
+                // 開啟Flyout
+                deviceFlyout.IsOpen = true;
+            }
+            catch (Exception ex)
+            {
+                messageDialog("讀取站位內容發生錯誤", ex.Message);
+            }
         }
 
         // 更新站位 Tag Table 內容
@@ -414,7 +429,7 @@ namespace Mirle_GPLC
             tagList.Clear();
 
             // 加入裝置的所有點位到 taglist
-            tagList.AddRange(device.tags);
+            tagList.AddRange(device.TagList);
             // 加入點位到Tag Table
             TagTableAdd(tagList);
             TagDataSource.Refresh();
@@ -546,7 +561,7 @@ namespace Mirle_GPLC
 
         private void gMap_OnMapTypeChanged(GMapProvider type)
         {
-            deviceEditControl.Map_SetPosition.MapProvider = type;
+            deviceEdit.Map_SetPosition.MapProvider = type;
             _viewModel.setting.MapProvider = type;
         }
 
@@ -562,6 +577,14 @@ namespace Mirle_GPLC
         public void OnThemeChanged(AccentColorMenuData accentColor)
         {
             _viewModel.setting.AccentColor = accentColor;
+        }
+
+        private void tabControl_main_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.Source == tabControl_main && tabItem_setting.IsSelected)
+            {
+                deviceFlyout.IsOpen = false;
+            }
         }
     }
 }
