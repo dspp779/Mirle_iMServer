@@ -21,6 +21,11 @@ namespace Mirle.iMServer.Model
     {
         public static DeviceData Empty = new DeviceData();
 
+        static DeviceData()
+        {
+            Empty.Tags[TagData.Empty.log_id] = TagData.Empty;
+        }
+
         protected string _alias;
         protected string _deviceName;
         protected string _addr;
@@ -79,7 +84,6 @@ namespace Mirle.iMServer.Model
         {
             _lat = _lng = 0;
             _alias = _deviceName = _addr = "";
-            Tags[TagData.Empty.log_id] = TagData.Empty;
         }
 
         public DeviceData(string deviceName)
@@ -101,11 +105,6 @@ namespace Mirle.iMServer.Model
 
         #region -- 站位的資料設定 --
         public void apply(DeviceData device)
-        {
-            set(device.alias, device.deviceName, device.addr, device.lat, device.lng);
-        }
-
-        public void apply(Int64 id, DeviceData device)
         {
             set(device.alias, device.deviceName, device.addr, device.lat, device.lng);
         }

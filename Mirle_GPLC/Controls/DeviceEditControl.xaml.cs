@@ -57,11 +57,12 @@ namespace Mirle_GPLC.Controls
                     _device = DeviceData.Empty;
                     button_edit.IsEnabled = false;
                 }
+
                 // 更新 textbox 的值
                 textBlock_deviceName.Text = _device.deviceName;
                 textBox_deviceAlias.Text = _device.alias;
                 textBox_deviceAddr.Text = _device.addr;
-                // 更新地圖選取位置與縮放，id > 0 代表已設定位置
+                // 更新地圖選取位置與縮放，別名存在代表站位已設定
                 if (!string.IsNullOrWhiteSpace(_device.alias))
                 {
                     textBox_lng.Text = _device.lng.ToString();
@@ -130,6 +131,7 @@ namespace Mirle_GPLC.Controls
             Map_SetPosition.DragButton = MouseButton.Left;
             // 設定初始位置
             Map_SetPosition.Position = new PointLatLng(23.8, 121);
+            // 設定初始經緯度文字方塊
             textBox_lng.Text = textBox_lat.Text = "";
         }
 
@@ -169,7 +171,9 @@ namespace Mirle_GPLC.Controls
                     new DeviceData(alias, Device.deviceName, addr, lat, lng);
 
                 // 插入 或 更新 站位資訊
-                insertUpdate(device);
+                ModelUtil.insertUpdateDervice(device);
+                // apply to viewing content
+                Device.apply(device);
             }
             catch (Exception ex)
             {
@@ -179,24 +183,6 @@ namespace Mirle_GPLC.Controls
             {
                 // 更新 MainWindow
                 MainWindow.runningInstance.refreshData();
-            }
-        }
-
-        private void insertUpdate(DeviceData device)
-        {
-            // update
-            if (!string.IsNullOrWhiteSpace(_device.alias))
-            {
-                ModelUtil.updateDervice(device);
-                // apply to viewing content
-                Device.apply(device);
-            }
-            // insert
-            else
-            {
-                int id = ModelUtil.insertUpdateDervice(device);
-                // apply to viewing content
-                Device.apply(id, device);
             }
         }
 
